@@ -1,12 +1,8 @@
 // next.config.ts
-
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  eslint: {
-    // 빌드할 때 ESLint 에러 때문에 배포가 막히지 않게 함
-    ignoreDuringBuilds: true,
-  },
+  // 지금은 별도 설정 없이 기본값 사용
 };
 
 export default nextConfig;
