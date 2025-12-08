@@ -1,0 +1,71 @@
+/* === Hero 전용 미세 유틸 === */
+.tw-text-softshadow { text-shadow: 0 1px 0 rgba(255,255,255,.35); }
+
+/* 버튼 공통 */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+  will-change: transform, box-shadow;
+}
+.btn:focus-visible { outline: 2px solid #BFAF96; outline-offset: 2px; }
+
+/* 다크 버튼 */
+.btn--primary{
+  color:#fff;
+  background:#2B241C;
+  border:1px solid #1F1A14;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.06);
+}
+.btn--primary:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(0,0,0,.22), inset 0 -1px 0 rgba(255,255,255,.08);
+}
+
+/* 라이트 버튼 */
+.btn--light{
+  color:#2B241C;
+  background: rgba(255,255,255,.90);
+  border:1px solid #C2B7A6;   /* 라벨과 톤 맞춤 */
+  box-shadow: 0 8px 22px rgba(0,0,0,.12), inset 0 -1px 0 rgba(255,255,255,.70);
+}
+.btn--light:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,.16), inset 0 -1px 0 rgba(255,255,255,.75);
+}
+
+/* 고급스러운 반사광(글로스) */
+.btn-shine::after,
+.btn-shine-soft::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(120deg, rgba(255,255,255,.0) 15%, rgba(255,255,255,.35) 35%, rgba(255,255,255,.0) 55%);
+  transform: translateX(-140%);
+  transition: transform .7s ease;
+  border-radius: inherit;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.btn-shine:hover::after { transform: translateX(130%); }
+.btn-shine-soft:hover::after { transform: translateX(130%); }
+
+/* 버튼 하단 짧은 서브카피 – 버튼 폭과 정렬 맞춤 */
+.cta-subcopy{
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color:#6A6052;
+  text-align:center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (min-width: 640px){
+  .cta-subcopy{ font-size: 13px; }
+}

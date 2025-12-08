@@ -1,0 +1,458 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   Quat-style marquee rails (프로그램 카드 가로 마키)
+   - 기존 동작 그대로 복구
+   ========================================================= */
+.pta-marquee{
+  --pta-gap:16px;
+  --pta-duration:26s;
+  position:relative;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(to right,transparent 0%,black 8%,black 92%,transparent 100%);
+          mask-image:linear-gradient(to right,transparent 0%,black 8%,black 92%,transparent 100%);
+}
+.pta-marquee__track{
+  display:flex;
+  gap:var(--pta-gap);
+  width:max-content;
+  animation:pta-marquee var(--pta-duration) linear infinite;
+  will-change:transform;
+}
+.pta-marquee--reverse .pta-marquee__track{
+  animation-direction:reverse;
+}
+@keyframes pta-marquee{
+  0%{ transform:translateX(0) }
+  100%{ transform:translateX(-50%) }
+}
+
+/* =========================================================
+   Review card (리뷰 카드) – 기존 스타일 복구
+   ========================================================= */
+.pta-review{
+  width:420px; height:180px;
+  border-radius:16px;
+  background:rgba(255,255,255,.92);
+  border:1px solid #E5DED1;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+  padding:16px 18px;
+}
+@media (max-width:1024px){
+  .pta-review{ width:360px; height:180px; }
+}
+@media (max-width:640px){
+  .pta-review{ width:300px; height:180px; }
+}
+.pta-review__title{
+  font-weight:700;
+  font-size:15px;
+  color:#1E1B16;
+}
+.pta-review__body{
+  margin-top:8px;
+  font-size:14px;
+  line-height:1.65;
+  color:#403A32;
+}
+.pta-chip{
+  display:inline-block;
+  margin-top:10px;
+  margin-right:6px;
+  padding:4px 8px;
+  font-size:12px;
+  color:#4A4138;
+  background:#fff;
+  border:1px solid #E6E0D6;
+  border-radius:999px;
+}
+
+/* =========================================================
+   👇 아래부터가 이번에 “추가”하기로 한 히어로·버튼 보강
+   (기존 것 건드리지 않고 유틸리티만 더함)
+   ========================================================= */
+
+/* 히어로 텍스트 가독성 보조(아주 은은한 라이트 섀도) */
+.tw-text-softshadow{
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+}
+
+/* 히어로 배경 이미지 컨트롤: 조금 더 옅고, 좌측 피사체 노출 */
+.hero-bg{
+  position:absolute; inset:0; z-index:-1;
+}
+.hero-bg img{
+  width:100%; height:100%; object-fit:cover;
+  object-position:left center;         /* ← 왼쪽으로 시선 이동 */
+  filter:opacity(.62) contrast(1.02);  /* ← “조금 더 옅게” */
+}
+
+/* 버튼 공통 (윤곽/효과 일원화) */
+.btn{
+  position:relative;
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:10px; padding:0 18px; height:48px;
+  border-radius:9999px;
+  font-weight:700; letter-spacing:-0.01em;
+  transition:transform .15s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+  will-change:transform, box-shadow;
+}
+.btn:focus-visible{ outline:2px solid #BFAF96; outline-offset:2px; }
+
+/* 왼쪽 CTA(어두운 톤) */
+.btn--primary{
+  color:#fff;
+  background:#2B241C;                /* Espresso */
+  border:1px solid #1F1A14;
+  box-shadow:0 10px 24px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.btn--primary:hover{
+  transform:translateY(-1px);
+  box-shadow:0 14px 28px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.btn--primary:active{ transform:translateY(0); }
+
+/* 오른쪽 CTA(밝은 톤) */
+.btn--ghost{
+  color:#2B241C;
+  background:#F7F2EA;                /* Champagne 50 */
+  border:1px solid #E6DFD3;
+  box-shadow:0 8px 18px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.btn--ghost:hover{
+  background:#F3ECE2;
+  transform:translateY(-1px);
+  box-shadow:0 12px 22px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.55);
+}
+.btn--ghost:active{ transform:translateY(0); }
+
+/* 버튼 반사광(은은하게) */
+.btn[data-sheen="true"]::after{
+  content:"";
+  position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(120deg, rgba(255,255,255,0) 20%, rgba(255,255,255,.22) 40%, rgba(255,255,255,0) 60%);
+  transform:translateX(-120%);
+  transition:transform .6s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+}
+.btn[data-sheen="true"]:hover::after{
+  transform:translateX(120%);
+}
+
+/* 버튼 하단 서브카피(폭을 버튼 안쪽에 정밀 정렬) */
+.cta-subcopy{
+  max-width:680px; margin:10px auto 0;
+  display:grid; grid-template-columns:1fr 1fr; gap:24px;
+  font-size:14px; line-height:1.65; color:#5A5046;
+}
+@media (max-width:640px){
+  .cta-subcopy{ grid-template-columns:1fr; gap:8px; font-size:13px; }
+}
+
+/* 헤드라인 위 보조 라벨(알약 캡슐) */
+.capsule{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.75);
+  border:1px solid rgba(31,26,20,.08);
+  box-shadow:0 6px 18px rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.6);
+  backdrop-filter:saturate(120%) blur(2px);
+  -webkit-backdrop-filter:saturate(120%) blur(2px);
+  font-size:12px; font-weight:600; letter-spacing:.02em; color:#5A5046;
+}
+
+/* 히어로 내부 영역 최대폭/중앙 정렬 보조 */
+.hero-inner{
+  max-width: 1040px;
+  margin-inline:auto;
+  padding-inline: 16px;
+@keyframes luxshine {
+  0% {
+    transform: translateX(-160%) skewX(-12deg);
+    opacity: 0.0;
+  }
+  25% {
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(160%) skewX(-12deg);
+    opacity: 0.8;
+  }
+  75% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(160%) skewX(-12deg);
+    opacity: 0.0;
+  }
+}
+
+}
+/* ===== CTA 미세 인터랙션(호버 전에도 은은히 보이게) ===== */
+@keyframes cta-float {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-1.5px); }
+  100% { transform: translateY(0); }
+}
+@keyframes cta-shine {
+  0%   { transform: translateX(-140%) skewX(-12deg); }
+  60%  { transform: translateX(140%)  skewX(-12deg); }
+  100% { transform: translateX(140%)  skewX(-12deg); }
+}
+
+/* 버튼 살짝 떠있는 느낌(아주 미세) */
+.cta-float {
+  animation: cta-float 4.8s ease-in-out infinite;
+}
+
+/* 유리 반사광이 6초에 한 번 지나감 (호버 시 살짝 빨라짐) */
+.cta-shine { position: relative; overflow: hidden; }
+.cta-shine::before{
+  content:"";
+  position:absolute; inset: -6px auto -6px -40%;
+  width:38%;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%,
+                                       rgba(255,255,255,.45) 50%,
+                                       rgba(255,255,255,0) 100%);
+  filter: blur(0.2px);
+  animation: cta-shine 6s ease-out infinite;
+}
+.cta-shine:hover::before{ animation-duration: 2.2s; }
+
+/* 시스템이 '애니메이션 최소화'를 설정한 사용자는 정적 */
+@media (prefers-reduced-motion: reduce) {
+  .cta-float { animation: none !important; }
+  .cta-shine::before { animation: none !important; }
+}
+.cta-shine::before {
+  /* 기존 내용 유지 + 이 줄 추가 */
+  animation: cta-shine 6s ease-out infinite;  /* ✅ 자동 재생 활성화 */
+}
+/* =========================
+   Smooth Shine (끊김 없는 루프)
+   ========================= */
+@keyframes cta-shine-smooth {
+  0%   { transform: translateX(-180%) skewX(-12deg); opacity: 0; }
+  15%  { opacity: .5; }
+  50%  { transform: translateX(0%)    skewX(-12deg); opacity: .85; }
+  85%  { opacity: .5; }
+  100% { transform: translateX(180%)  skewX(-12deg); opacity: 0; }
+}
+
+/* 공통 컨테이너 */
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+/* 다크 버튼용: 흰 광택을 스크린 블렌드로 */
+.cta-shine--dark::before {
+  content: "";
+  position: absolute;
+  inset: -6px auto -6px -55%;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,.90) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  filter: blur(1px);
+  mix-blend-mode: screen;
+  animation: cta-shine-smooth 7.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 라이트 버튼용: 샴페인 톤의 미세한 '그림자형' 광택을 multiply로 */
+.cta-shine--light::before {
+  content: "";
+  position: absolute;
+  inset: -6px auto -6px -55%;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0) 0%,
+    rgba(155,135,110,.18) 50%,   /* Champagne Brown tint */
+    rgba(0,0,0,0) 100%
+  );
+  filter: blur(1.2px);
+  mix-blend-mode: multiply;
+  animation: cta-shine-smooth 7.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 라이트 버튼 가독성 강화(윤곽/내부광) */
+.btn-light-elevated {
+  background: #ffffff !important;
+  border: 1px solid #BEB3A3 !important;
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.14),
+    inset 0 -1px 0 rgba(255,255,255,.85),
+    inset 0  1px 2px rgba(0,0,0,.06);
+}
+/* =========================
+   Smooth Shine (끊김 없는 루프, 타이밍 분리형)
+   ========================= */
+@keyframes cta-shine-smooth {
+  0%   { transform: translateX(-180%) skewX(-12deg); opacity: 0; }
+  15%  { opacity: .5; }
+  50%  { transform: translateX(0%) skewX(-12deg); opacity: .85; }
+  85%  { opacity: .5; }
+  100% { transform: translateX(180%) skewX(-12deg); opacity: 0; }
+}
+
+/* 공통 컨테이너 */
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+/* 다크 버튼용: 흰 광택 */
+.cta-shine--dark::before {
+  content: "";
+  position: absolute;
+  inset: -6px auto -6px -55%;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,.9) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  filter: blur(1px);
+  mix-blend-mode: screen;
+  animation: cta-shine-smooth 8.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 라이트 버튼용: 샴페인톤 그림자형 광택 */
+.cta-shine--light::before {
+  content: "";
+  position: absolute;
+  inset: -6px auto -6px -55%;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0) 0%,
+    rgba(155,135,110,.20) 50%,
+    rgba(0,0,0,0) 100%
+  );
+  filter: blur(1.3px);
+  mix-blend-mode: multiply;
+  animation: cta-shine-smooth 8.5s ease-in-out infinite;
+  animation-delay: 0.9s; /* 두 버튼 타이밍 엇갈리게 */
+  pointer-events: none;
+}
+
+/* 라이트 버튼 가독성 강화 */
+.btn-light-elevated {
+  background: #ffffff !important;
+  border: 1px solid #B5A896 !important;
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.14),
+    inset 0 -1px 0 rgba(255,255,255,.85),
+    inset 0  1px 2px rgba(0,0,0,.06);
+}
+
+/* 활성(클릭) 피드백 */
+button:active {
+  transform: scale(0.99);
+  transition: transform 0.08s ease;
+}
+/* 부드러운 앵커 스크롤 */
+html { scroll-behavior: smooth; }
+/* === Reviews: Quat-style twin marquee rails === */
+.review-rail{
+  position:relative; overflow:hidden;
+  -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 8%,#000 92%,transparent 100%);
+          mask-image:linear-gradient(to right,transparent 0%,#000 8%,#000 92%,transparent 100%);
+}
+.review-track{ display:flex; width:max-content; animation:rev-marquee 26s linear infinite; will-change:transform; }
+.review-track--slow{ animation-duration:30s; }
+.review-rail--reverse .review-track{ animation-direction:reverse; }
+@keyframes rev-marquee{ 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.review-rail:hover .review-track{ animation-play-state:paused; }
+
+/* === Tag chip shimmer (no styled-jsx) === */
+.chip{
+  position:relative; display:inline-flex; align-items:center; border-radius:9999px;
+  border:1px solid #D6CBBE; background:rgba(245,238,227,.9);
+  padding:6px 12px; font-size:12.5px; color:#4C4338; font-weight:500;
+  box-shadow:0 2px 6px rgba(0,0,0,.08); transition:all .3s ease-out;
+}
+.chip:hover{
+  background:#E8DFD1; border-color:#BFAF96;
+  transform:translateY(-2px); box-shadow:0 6px 12px rgba(0,0,0,.12);
+}
+.chip .chip-shimmer{
+  pointer-events:none; position:absolute; inset:0; overflow:hidden; border-radius:9999px;
+}
+.chip .chip-shimmer::before{
+  content:""; position:absolute; top:-30%; left:-40%; width:42%; height:160%;
+  transform:translateX(-140%) skewX(-18deg);
+  background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.45), rgba(255,255,255,0));
+  animation:chipShimmer 1.8s ease-out infinite;
+}
+.chip:hover .chip-shimmer::before{ animation-duration:1.1s; }
+@keyframes chipShimmer{
+  0%{ transform:translateX(-140%) skewX(-18deg); opacity:.55; }
+  60%{ transform:translateX(240%) skewX(-18deg); opacity:.9; }
+  100%{ transform:translateX(240%) skewX(-18deg); opacity:0; }
+}
+
+/* Accessibility: motion reduction */
+@media (prefers-reduced-motion: reduce){
+  .review-track{ animation:none !important; }
+  .chip .chip-shimmer::before{ animation:none !important; }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+/* === Chatbot finish overlay === */
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+/* 가로 슬라이더 스크롤바 숨기기 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+

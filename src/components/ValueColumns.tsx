@@ -1,0 +1,254 @@
+"use client";
+
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+
+type ValueCard = {
+  id: number;
+  image: string;
+  tag: string;
+  title: string;
+  description: string;
+};
+
+const VALUE_CARDS: ValueCard[] = [
+  {
+    id: 0,
+    image: "/values/v1.jpg",
+    tag: "전문성",
+    title: "피티앳홈 코치는 모두\n체육전공자 출신입니다.",
+    description:
+      "단순한 운동 지도에서 벗어나, 과학적 분석과 전문 지식을 기반으로 당신의 몸과 생활 패턴에 꼭 맞는 1:1 루틴을 설계합니다.",
+  },
+  {
+    id: 1,
+    image: "/values/v2.jpg",
+    tag: "준비물",
+    title: "운동 준비물은 모두\n코치가 대신 챙겨갑니다.",
+    description:
+      "요가매트, 덤벨, 밴드 없어도 괜찮아요. 코치가 필요한 도구를 직접 준비해 방문하며, 공간만 있으면 바로 운동을 시작할 수 있습니다.",
+  },
+  {
+    id: 2,
+    image: "/values/v3.jpg",
+    tag: "지속성",
+    title: "꾸준함은 의지가 아니라\n구조의 문제입니다.",
+    description:
+      "억지로 버티는 운동은 오래갈 수 없습니다. 생활 리듬에 자연스럽게 녹아드는 방식으로, 무리 없이 지속 가능한 루틴을 함께 만들어갑니다.",
+  },
+  {
+    id: 3,
+    image: "/values/v4.jpg",
+    tag: "홈 트레이닝",
+    title: "익숙한 공간이 편안한\n 트레이닝 환경이 됩니다.",
+    description:
+      "코치가 직접 방문하여 생활 패턴과 공간 특성에 맞춘 운동 루틴을 구성합니다. 헬스장보다 편안하게, 일상 속에서 변화가 이어집니다.",
+  },
+];
+
+function mod(n: number, m: number) {
+  return ((n % m) + m) % m;
+}
+
+export default function ValueColumns() {
+  const autoplay = useRef(
+    Autoplay({
+      delay: 6000,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+    })
+  );
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop: true,
+      align: "center",
+      skipSnaps: false,
+    },
+    [autoplay.current]
+  );
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const scrollPrev = useCallback(() => {
+    if (!emblaApi) return;
+    autoplay.current.stop();
+    emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (!emblaApi) return;
+    autoplay.current.stop();
+    emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (!emblaApi) return;
+      autoplay.current.stop();
+      emblaApi.scrollTo(index);
+    },
+    [emblaApi]
+  );
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    };
+
+    onSelect();
+    emblaApi.on("select", onSelect);
+
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
+
+  return (
+    <section className="bg-[#F7F0E6] py-16">
+      <div className="max-w-5xl mx-auto px-6">
+        {/* 헤드라인 */}
+        <h2 className="text-center text-[24px] font-semibold leading-snug text-[#3B3127] sm:text-[26px]">
+          피티앳홈이 만들어가는 새로운 트레이닝 기준
+        </h2>
+        <p className="mt-3 text-center text-sm text-[#8B7B68] leading-relaxed">
+          전문 코치와 함께 익숙한 공간에서 꾸준히 이어지는 1:1 홈트레이닝.
+        </p>
+
+        {/* 슬라이더 영역 */}
+        <div className="relative mt-8 overflow-x-hidden">
+          {/* 좌/우 화살표 */}
+          <button
+            type="button"
+            aria-label="이전 카드"
+            onClick={scrollPrev}
+            className="
+              flex items-center justify-center
+              absolute z-20
+              left-[6%] sm:left-[10%]
+              top-1/2 -translate-y-1/2
+              h-9 w-9 sm:h-10 sm:w-10
+              rounded-full border border-[#E4D6C4]
+              bg-[#FBF6EE]/95 shadow-sm backdrop-blur-sm
+              active:scale-95
+            "
+          >
+            <span className="text-lg sm:text-xl text-[#7A6B59]">‹</span>
+          </button>
+
+          <button
+            type="button"
+            aria-label="다음 카드"
+            onClick={scrollNext}
+            className="
+              flex items-center justify-center
+              absolute z-20
+              right-[6%] sm:right-[10%]
+              top-1/2 -translate-y-1/2
+              h-9 w-9 sm:h-10 sm:w-10
+              rounded-full border border-[#E4D6C4]
+              bg-[#FBF6EE]/95 shadow-sm backdrop-blur-sm
+              active:scale-95
+            "
+          >
+            <span className="text-lg sm:text-xl text-[#7A6B59]">›</span>
+          </button>
+
+          {/* Embla 뷰포트 */}
+          <div className="overflow-hidden px-6" ref={emblaRef}>
+            <div className="-mx-3 flex">
+              {VALUE_CARDS.map((card, index) => {
+                const total = VALUE_CARDS.length;
+                const leftIndex = mod(selectedIndex - 1, total);
+                const rightIndex = mod(selectedIndex + 1, total);
+
+                const isActive = index === selectedIndex;
+                const isSide = index === leftIndex || index === rightIndex;
+
+                const scaleClass = isActive
+                  ? "scale-100"
+                  : isSide
+                  ? "scale-[0.94]"
+                  : "scale-[0.88]";
+                const opacityClass = isActive
+                  ? "opacity-100"
+                  : isSide
+                  ? "opacity-70"
+                  : "opacity-40";
+                const blurClass = isActive ? "blur-0" : "blur-[1px]";
+
+                return (
+                  <div
+                    key={card.id}
+                    className="min-w-0 flex-[0_0_85%] sm:flex-[0_0_70%] lg:flex-[0_0_55%] px-3"
+                  >
+                    <article
+                      className={[
+                        "bg-[#F3E5D5] rounded-[32px] shadow-md overflow-hidden",
+                        "transition-all duration-500 ease-out",
+                        "border border-[#E4D6C4]/70",
+                        "flex flex-col",
+                        scaleClass,
+                        opacityClass,
+                        blurClass,
+                      ].join(" ")}
+                    >
+                      {/* 이미지 */}
+                      <div className="relative aspect-[4/3] w-full overflow-hidden">
+                        <Image
+                          src={card.image}
+                          alt={card.tag}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 90vw, 60vw"
+                          priority={index === 0}
+                        />
+                      </div>
+
+                      {/* 텍스트 영역 */}
+                      <div className="flex flex-col px-6 pb-7 pt-4 sm:px-7 sm:pb-8 sm:pt-5 min-h-[190px]">
+                        <div className="inline-flex rounded-full bg-[#F8EFE4] px-3 py-1 text-[11px] font-medium text-[#8B7B68]">
+                          {card.tag}
+                        </div>
+
+                        <h3 className="mt-3 text-[17px] font-semibold text-[#3B3127] leading-snug whitespace-pre-line">
+                          {card.title}
+                        </h3>
+
+                        <p className="mt-3 text-[13px] leading-relaxed text-[#7A6B59]">
+                          {card.description}
+                        </p>
+                      </div>
+                    </article>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 인디케이터 점 */}
+          <div className="mt-6 flex justify-center gap-2">
+            {VALUE_CARDS.map((card, index) => (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => scrollTo(index)}
+                aria-label={`${index + 1}번 카드로 이동`}
+                className={[
+                  "h-1.5 rounded-full transition-all duration-300",
+                  selectedIndex === index
+                    ? "w-5 bg-[#D39A6A]"
+                    : "w-1.5 bg-[#E4D6C4]",
+                ].join(" ")}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
