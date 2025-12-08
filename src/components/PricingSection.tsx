@@ -9,330 +9,284 @@ type PlanKey = "basic" | "special" | "premium";
 type Plan = {
   key: PlanKey;
   name: string;
-  sessions: number;
   price: string;
-  taglineStrong: string;
-  taglineSub: string;
-  bullets: { strong: string; rest?: string }[];
-  hashtags: string[];
+  subtitle?: string;
+  description: string;
+  badge?: string;
+  features: string[];
+  highlight?: boolean;
+  accentColor: string; // Tailwind color name (ex: 'emerald-500')
 };
-
-/* -------------------------------
-   테두리 + 그림자 스타일 세트
----------------------------------*/
-
-const PLAN_STYLES: Record<PlanKey, { border: string; shadow: string }> = {
-  basic: {
-    border: "border-[#F0B86A]", // 따뜻한 골드
-    shadow: "shadow-[0_8px_22px_rgba(240,184,106,0.22)]",
-  },
-  special: {
-    border: "border-[#7FA8FF]", // 파스텔 블루
-    shadow: "shadow-[0_8px_22px_rgba(127,168,255,0.22)]",
-  },
-  premium: {
-    border: "border-[#FF4B4B]", // 🔥 강렬 레드
-    shadow: "shadow-[0_10px_26px_rgba(255,75,75,0.30)]",
-  },
-};
-
-/* -------------------------------
-   요금제 데이터
----------------------------------*/
 
 const PLANS: Plan[] = [
   {
     key: "basic",
-    name: "베이직",
-    sessions: 4,
-    price: "₩280,000",
-    taglineStrong: "부담 없이 시작하고, 기본은 정확하게",
-    taglineSub: "방문PT를 부담없이 시작하고 싶은 사람.",
-    bullets: [
-      { strong: "방문 PT", rest: " 를 부담 없이 시작" },
-      { strong: "자세·호흡·가동성", rest: " 중심의 정확한 기본기 확립" },
-      { strong: "홈 맞춤 루틴", rest: " 설계로 꾸준함을 이어가게" },
+    name: "Basic",
+    price: "280,000원",
+    subtitle: "월 4회 방문 PT",
+    description: "주 1회, 바쁜 일정 속에서도 꾸준히 운동을 시작하고 싶은 분께.",
+    badge: "입문 추천",
+    features: [
+      "1:1 방문 PT (50분 수업)",
+      "체형·자세 체크 후 맞춤 프로그램 구성",
+      "집/헬스장/커뮤니티룸 방문 가능",
+      "카카오톡 운동 피드백 (주 1회)",
     ],
-    hashtags: ["#부담없이", "#기본기확립", "#루틴설계"],
+    highlight: false,
+    accentColor: "emerald-500",
   },
   {
     key: "special",
-    name: "스페셜",
-    sessions: 8,
-    price: "₩540,000",
-    taglineStrong: "루틴은 유지하고, 완성도는 높인다",
-    taglineSub: "운동습관을 잡고 꾸준히 운동하고 싶은 사람.",
-    bullets: [
-      { strong: "체형교정 + 근력운동", rest: " 중심의 중간 단계 관리" },
-      { strong: "정기 수업·피드백 루프", rest: " 로 운동 습관 유지" },
-      { strong: "일상 속 지속성", rest: " 을 높이는 효율적 세션 구성" },
+    name: "Special",
+    price: "540,000원",
+    subtitle: "월 8회 방문 PT",
+    description: "체형 교정 + 바디라인 관리까지 함께 잡고 싶은 분께.",
+    badge: "가장 많이 선택",
+    features: [
+      "1:1 방문 PT (50분 수업)",
+      "체형·통증 개선 맞춤 프로그램",
+      "주 2회 방문으로 빠른 체감 변화",
+      "카카오톡 운동/식단 피드백 (주 2회)",
     ],
-    hashtags: ["#운동습관", "#지속성", "#꾸준한관리"],
+    highlight: true,
+    accentColor: "amber-400",
   },
   {
     key: "premium",
-    name: "프리미엄",
-    sessions: 12,
-    price: "₩780,000",
-    taglineStrong: "목표는 선명하게, 결과는 확실하게",
-    taglineSub: "목표달성을 위해 집중 관리를 원하는 사람.",
-    bullets: [
-      { strong: "기간별 목표 로드맵", rest: " 으로 단계별 진행" },
-      { strong: "체성분·신체움직임 변화", rest: " 를 리포트로 추적" },
-      { strong: "완성도 극대화", rest: " 를 위한 장기 목표 기반 프로그램" },
+    name: "Premium",
+    price: "780,000원",
+    subtitle: "월 12회 방문 PT",
+    description: "체지방 감량, 바디프로필·웨딩 등 확실한 변화를 원하시는 분께.",
+    badge: undefined, // 🔴 프리미엄은 두 줄 효과(뱃지) 제거
+    features: [
+      "1:1 방문 PT (50분 수업)",
+      "주 3회 고정 스케줄 관리",
+      "체형·체력·식단까지 풀케어",
+      "체성분 변화 리포트 제공",
     ],
-    hashtags: ["#목표달성중심", "#변화추적", "#완성도극대화"],
+    highlight: false,
+    // 🔴 프리미엄은 포인트 컬러 빨간색
+    accentColor: "red-500",
   },
 ];
 
-/* -------------------------------
-   메인 컴포넌트
----------------------------------*/
+function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
-export default function PricingSection() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    align: "center",
-    skipSnaps: false,
-  });
+const PricingSection: React.FC = () => {
+  const [selectedIndex, setSelectedIndex] = useState(1); // 기본 선택: Special
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-  const scrollTo = useCallback((i: number) => emblaApi?.scrollTo(i), [emblaApi]);
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (!emblaApi) return;
+      emblaApi.scrollTo(index);
+    },
+    [emblaApi],
+  );
 
   useEffect(() => {
     if (!emblaApi) return;
 
-    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
-    emblaApi.on("select", onSelect);
+    const onSelect = () => {
+      const snap = emblaApi.selectedScrollSnap();
+      setSelectedIndex(snap);
+    };
 
-    return () => emblaApi.off("select", onSelect);
+    emblaApi.on("select", onSelect);
+    onSelect(); // 초기 한 번 동기화
+
+    // 🔧 타입 에러 안 나게 정석 cleanup 형태로 반환
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
   }, [emblaApi]);
 
+  const handleTabClick = (planIndex: number) => {
+    scrollTo(planIndex);
+  };
+
   return (
-    <section className="relative isolate bg-[linear-gradient(180deg,#FFFFFF_0%,#FBFAF7_100%)] py-16 sm:py-24">
-      {/* 헤더 */}
-      <div className="mx-auto max-w-6xl px-6 text-center">
-        <p className="text-xs tracking-[0.2em] text-neutral-500">PRICE PLAN</p>
+    <section id="pricing" className="bg-slate-950 py-20 text-slate-50">
+      <div className="mx-auto max-w-6xl px-4">
+        {/* 제목 영역 */}
+        <div className="mb-10 text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">
+            MEMBERSHIP
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold leading-tight sm:text-4xl">
+            내 집에서 받는 프리미엄 1:1 방문 PT
+          </h2>
+          <p className="mt-4 text-sm text-slate-400 sm:text-base">
+            횟수에 따라 자유롭게 선택하세요. 부담 없이 시작하고, 눈에 보이는 변화까지 함께 갑니다.
+          </p>
+        </div>
 
-        <h2 className="mt-2 text-[26px] font-semibold leading-snug text-[#0F172A] sm:text-[32px]">
-          맞춤형 방문 PT를 선택하세요
-        </h2>
+        {/* 탭 (모바일 우선) */}
+        <div className="mb-6 flex gap-2 overflow-x-auto pb-2 sm:justify-center">
+          {PLANS.map((plan, index) => {
+            const isActive = selectedIndex === index;
+            const accentBase = plan.accentColor; // ex) 'emerald-500'
+            const ringClass = isActive
+              ? `ring-2 ring-${accentBase} bg-slate-900`
+              : "ring-1 ring-slate-700 bg-slate-900/40";
 
-        <p className="mt-2 text-[14px] leading-7 text-[#5E5E5E]">
-          원하는 페이스로 지속 가능한 변화를 만들어갑니다.
-        </p>
-      </div>
+            return (
+              <button
+                key={plan.key}
+                type="button"
+                onClick={() => handleTabClick(index)}
+                className={cn(
+                  "flex-shrink-0 rounded-full px-4 py-2 text-xs font-medium transition sm:text-sm",
+                  ringClass,
+                )}
+              >
+                {plan.name}
+              </button>
+            );
+          })}
+        </div>
 
-      {/* 슬라이더 */}
-      <div className="mx-auto mt-10 max-w-6xl px-4 sm:px-6">
+        {/* 캐러셀 영역 */}
         <div className="relative">
-          {/* 이전 버튼 */}
-          <button
-            onClick={scrollPrev}
-            aria-label="이전 요금제"
-            className="
-              absolute left-[6%] sm:left-[10%] top-1/2 z-10
-              flex h-10 w-10 -translate-y-1/2 items-center justify-center
-              rounded-full border border-[#E6E0D6]
-              bg-white/95 shadow-[0_10px_30px_rgba(0,0,0,0.08)]
-              backdrop-blur-sm active:scale-95
-            "
-          >
-            <span className="text-lg text-[#C0A88A]">‹</span>
-          </button>
+          {/* Embla viewport */}
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-4">
+              {PLANS.map((plan, index) => {
+                const isActive = selectedIndex === index;
+                const accentBase = plan.accentColor; // ex) 'red-500'
 
-          {/* 다음 버튼 */}
-          <button
-            onClick={scrollNext}
-            aria-label="다음 요금제"
-            className="
-              absolute right-[6%] sm:right-[10%] top-1/2 z-10
-              flex h-10 w-10 -translate-y-1/2 items-center justify-center
-              rounded-full border border-[#E6E0D6]
-              bg-white/95 shadow-[0_10px_30px_rgba(0,0,0,0.08)]
-              backdrop-blur-sm active:scale-95
-            "
-          >
-            <span className="text-lg text-[#C0A88A]">›</span>
-          </button>
+                return (
+                  <article
+                    key={plan.key}
+                    className={cn(
+                      "min-w-0 flex-[0_0_100%] rounded-3xl border bg-slate-900/60 p-6 shadow-lg shadow-black/40 transition duration-300 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]",
+                      isActive
+                        ? "border-emerald-400/70 shadow-emerald-500/20"
+                        : "border-slate-800",
+                    )}
+                  >
+                    <div className="flex h-full flex-col">
+                      {/* 상단 뱃지 + 이름/설명 */}
+                      <div className="mb-4 flex items-start justify-between gap-2">
+                        <div>
+                          <h3 className="text-lg font-semibold sm:text-xl">
+                            {plan.name}
+                          </h3>
+                          {plan.subtitle && (
+                            <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+                              {plan.subtitle}
+                            </p>
+                          )}
+                        </div>
+                        {/* 🔸 프리미엄은 badge 없음(두 줄 효과 제거) */}
+                        {plan.badge && (
+                          <span className="inline-flex rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/30">
+                            {plan.badge}
+                          </span>
+                        )}
+                      </div>
 
-          {/* 뷰포트 */}
-          <div className="overflow-hidden px-4" ref={emblaRef}>
-            <div className="-mx-3 flex">
-              {PLANS.map((plan, index) => (
-                <div
-                  key={plan.key}
-                  className="
-                    min-w-0 flex-[0_0_88%]
-                    sm:flex-[0_0_70%]
-                    md:flex-[0_0_55%]
-                    lg:flex-[0_0_33.333%]
-                    px-3
-                  "
-                >
-                  <PlanCard data={plan} isActive={selectedIndex === index} />
-                </div>
-              ))}
+                      <p className="mb-4 text-xs text-slate-400 sm:text-sm">
+                        {plan.description}
+                      </p>
+
+                      {/* 가격 */}
+                      <div className="mb-5">
+                        <div className="flex items-baseline gap-1">
+                          <span
+                            className={cn(
+                              "text-2xl font-semibold sm:text-3xl",
+                              // 🔴 프리미엄만 빨간색, 나머지는 에메랄드/앰버 유지
+                              plan.key === "premium"
+                                ? "text-red-500"
+                                : plan.key === "special"
+                                  ? "text-amber-400"
+                                  : "text-emerald-400",
+                            )}
+                          >
+                            {plan.price}
+                          </span>
+                          <span className="text-xs text-slate-500 sm:text-sm">
+                            / 월
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
+                          VAT 포함 · 1:1 방문 PT 기준
+                        </p>
+                      </div>
+
+                      {/* 혜택 리스트 */}
+                      <ul className="mb-6 space-y-2 text-xs text-slate-200 sm:text-sm">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex gap-2">
+                            <span
+                              className={cn(
+                                "mt-[3px] inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full",
+                                plan.key === "premium"
+                                  ? "bg-red-500"
+                                  : plan.key === "special"
+                                    ? "bg-amber-400"
+                                    : "bg-emerald-400",
+                              )}
+                            />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {/* CTA 버튼 */}
+                      <div className="mt-auto pt-2">
+                        <button
+                          type="button"
+                          className={cn(
+                            "flex w-full items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition",
+                            plan.key === "premium"
+                              ? "bg-red-500 text-white hover:bg-red-600"
+                              : plan.key === "special"
+                                ? "bg-amber-400 text-slate-950 hover:bg-amber-300"
+                                : "bg-emerald-500 text-slate-950 hover:bg-emerald-400",
+                          )}
+                          onClick={() => {
+                            // 여기에 카카오톡 상담 / 신청 모달 오픈 등 연결 가능
+                            // 예: window.open(KAKAO_CHAT_URL, "_blank");
+                          }}
+                        >
+                          체험 수업 상담 받기
+                        </button>
+                        <p className="mt-2 text-center text-[11px] text-slate-500 sm:text-xs">
+                          첫 상담 후, 목적·체형에 맞는 최적의 요금제를 함께 안내드립니다.
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </div>
 
-          {/* 인디케이터 */}
-          <div className="mt-4 flex justify-center gap-2">
-            {PLANS.map((_, idx) => (
+          {/* 인디케이터 (동그라미) */}
+          <div className="mt-6 flex justify-center gap-2">
+            {PLANS.map((_, index) => (
               <button
-                key={idx}
-                onClick={() => scrollTo(idx)}
-                className={`h-2 rounded-full transition-all ${
-                  selectedIndex === idx
-                    ? "w-5 bg-[#F28C38]"
-                    : "w-2 bg-[#E5D9C9]"
-                }`}
+                key={index}
+                type="button"
+                onClick={() => scrollTo(index)}
+                className={cn(
+                  "h-2 w-2 rounded-full transition",
+                  selectedIndex === index
+                    ? "bg-emerald-400"
+                    : "bg-slate-600 hover:bg-slate-400",
+                )}
+                aria-label={`요금제 ${index + 1}로 이동`}
               />
             ))}
           </div>
         </div>
       </div>
-
-      {/* 하단 문구 */}
-      <p className="mx-auto mt-8 max-w-6xl px-6 text-center text-[13px] leading-6 text-[#6B7280]">
-        전원 한국체육대학교 출신 · 국가공인 자격 코치 전담 관리
-        <br className="sm:hidden" />
-        <span className="text-[#9AA1A9]">※ 환불 및 변경 규정은 공지사항 참고</span>
-      </p>
     </section>
   );
-}
+};
 
-/* -------------------------------
-   카드 컴포넌트
----------------------------------*/
-
-function PlanCard({ data, isActive }: { data: Plan; isActive: boolean }) {
-  const isPremium = data.key === "premium";
-  const style = PLAN_STYLES[data.key];
-
-  const scaleClass = isActive ? "scale-100" : "scale-[0.95]";
-  const shadowExtra = isActive ? "shadow-[0_12px_32px_rgba(0,0,0,0.08)]" : "";
-
-  return (
-    <article
-      className={`
-        relative flex h-full min-h-[470px] flex-col
-        rounded-2xl border bg-white/95 px-5 pb-5 pt-6
-        backdrop-blur transition-all duration-400 ease-out
-        ${style.border} ${style.shadow} ${scaleClass} ${shadowExtra}
-      `}
-    >
-      {/* 프리미엄 배지 */}
-      {isPremium && (
-        <div className="mb-3 flex justify-center">
-          <span
-            className="
-              inline-flex items-center rounded-full border border-[#FF4B4B]
-              bg-[linear-gradient(135deg,#FFD5D5_0%,#FF9A9A_45%,#FF4B4B_100%)]
-              px-3 py-1 text-[11px] font-semibold text-[#7A1E1E]
-              shadow-[inset_0_1px_2px_rgba(255,255,255,0.7),0_4px_12px_rgba(255,75,75,0.45)]
-            "
-          >
-            가장 많이 선택
-          </span>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-[18px] font-semibold text-[#0F172A]">
-          {data.name}
-        </h3>
-        <Badge>{data.sessions}회</Badge>
-      </div>
-
-      {/* Price */}
-      <div className="mt-3 flex items-center justify-between">
-        <div className="text-[26px] font-semibold text-[#0F172A] sm:text-[28px]">
-          {data.price}
-        </div>
-
-        <div className="h-6 w-6 shrink-0" />
-      </div>
-
-      {/* Taglines */}
-      <div className="mt-3">
-        <p className="text-[15px] font-semibold text-[#111827]">
-          {data.taglineStrong}
-        </p>
-        <p className="mt-1 text-[14px] leading-6 text-[#5E5E5E]">
-          {data.taglineSub}
-        </p>
-      </div>
-
-      {/* Hashtags */}
-      <div className="mt-4 flex flex-nowrap gap-2 overflow-hidden">
-        {data.hashtags.map((h) => (
-          <Chip key={h} text={h} />
-        ))}
-      </div>
-
-      {/* Bullets */}
-      <ul className="mt-5 min-h-[160px] grow space-y-2.5 text-[14px] leading-7 text-[#374151]">
-        {data.bullets.map((b, i) => (
-          <li key={i} className="flex gap-2">
-            <span className="mt-[9px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#D1C5B3]" />
-            <span>
-              <strong className="font-semibold text-[#111827]">
-                {b.strong}
-              </strong>
-              {b.rest && <span className="text-[#374151]"> {b.rest}</span>}
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      {/* CTA */}
-      <div className="mt-auto pt-3">
-        <CTA>상담 예약</CTA>
-      </div>
-    </article>
-  );
-}
-
-/* -------------------------------
-   Badge / Chip / CTA
----------------------------------*/
-
-function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full border border-[#E6E0D6] bg-white px-2.5 py-1 text-[12px] text-[#6B5B43]">
-      {children}
-    </span>
-  );
-}
-
-function Chip({ text }: { text: string }) {
-  return (
-    <span
-      className="inline-flex max-w-full items-center whitespace-nowrap rounded-full border border-[#E6E0D6] bg-white px-2.5 py-[5px] text-[12.5px] text-[#374151]"
-      title={text}
-    >
-      {text}
-    </span>
-  );
-}
-
-function CTA({ children }: { children: React.ReactNode }) {
-  return (
-    <button
-      className="
-        w-full rounded-xl border border-[#E6E0D6] bg-white
-        px-4 py-3 text-center text-[14.5px] font-semibold text-[#0F172A]
-        transition-all hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)]
-        hover:-translate-y-[1px] active:translate-y-0
-      "
-    >
-      {children}
-    </button>
-  );
-}
+export default PricingSection;
