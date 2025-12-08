@@ -2,7 +2,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // 지금은 별도 설정 없이 기본값 사용
+  // Next.js 16에서는 next.config에 eslint 옵션을 넣을 수 없어서 비워둡니다.
 };
 
 export default nextConfig;
