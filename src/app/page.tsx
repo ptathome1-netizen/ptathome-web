@@ -9,6 +9,8 @@ import ReviewsSection from "@/components/ReviewsSection";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import ContactCTA from "@/components/ContactCTA";
+import ProcessSection from "@/components/ProcessSection";
+
 
 export default function Home() {
   return (
@@ -18,6 +20,10 @@ export default function Home() {
 
       {/* ABOUT SECTION */}
       <About />
+
+     {/* 방문 PT 진행 과정 섹션 */}
+      <ProcessSection />
+ 
 
       {/* VALUE COLUMNS */}
       <ValueColumns />
