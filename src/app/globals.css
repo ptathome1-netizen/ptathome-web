@@ -454,5 +454,11 @@ html { scroll-behavior: smooth; }
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+:root{
+  /* 하단 고정바 실제 높이에 맞춰 조정 (예: 72px ~ 88px) */
+  --bottom-bar-h: 80px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --bottom-safe-pad: calc(var(--bottom-bar-h) + var(--safe-bottom));
+}
 
 
