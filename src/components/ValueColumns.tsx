@@ -110,14 +110,24 @@ export default function ValueColumns() {
 
   return (
     <section className="bg-[#F7F0E6] py-16">
-      <div className="max-w-5xl mx-auto px-6">
-        {/* 헤드라인 */}
-        <h2 className="text-center text-[24px] font-semibold leading-snug text-[#3B3127] sm:text-[26px]">
-          피티앳홈이 만들어가는 새로운 트레이닝 기준
-        </h2>
-        <p className="mt-3 text-center text-sm text-[#8B7B68] leading-relaxed">
-          전문 코치와 함께 익숙한 공간에서 꾸준히 이어지는 1:1 홈트레이닝.
-        </p>
+      <div className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8">
+        {/* 라벨 */}
+        <div className="inline-flex items-center gap-2 self-start rounded-full border border-[#E6D8CB] bg-white px-3 py-1 text-xs font-medium text-[#C69C72]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#C69C72]" />
+          피티앳홈 가치
+        </div>
+
+        {/* 제목 및 설명 */}
+        <div className="mt-6 max-w-3xl space-y-3">
+          <h2 className="text-2xl font-bold leading-snug tracking-tight text-[#3B2F2F] sm:text-3xl md:text-[2.1rem]">
+            피티앳홈이 만들어가는
+            <br /> 새로운 트레이닝 기준
+          </h2>
+
+          <p className="text-sm leading-relaxed text-[#5E5147] sm:text-[0.95rem]">
+            전문 코치와 함께 익숙한 공간에서 꾸준히 이어지는 1:1 홈트레이닝.
+          </p>
+        </div>
 
         {/* 슬라이더 영역 */}
         <div className="relative mt-8 overflow-x-hidden">
@@ -127,17 +137,14 @@ export default function ValueColumns() {
             aria-label="이전 카드"
             onClick={scrollPrev}
             className="
-              flex items-center justify-center
-              absolute z-20
-              left-[6%] sm:left-[10%]
-              top-1/2 -translate-y-1/2
-              h-9 w-9 sm:h-10 sm:w-10
+              absolute left-[6%] top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center
               rounded-full border border-[#E4D6C4]
               bg-[#FBF6EE]/95 shadow-sm backdrop-blur-sm
               active:scale-95
+              sm:left-[10%] sm:h-10 sm:w-10
             "
           >
-            <span className="text-lg sm:text-xl text-[#7A6B59]">‹</span>
+            <span className="text-lg text-[#7A6B59] sm:text-xl">‹</span>
           </button>
 
           <button
@@ -145,17 +152,14 @@ export default function ValueColumns() {
             aria-label="다음 카드"
             onClick={scrollNext}
             className="
-              flex items-center justify-center
-              absolute z-20
-              right-[6%] sm:right-[10%]
-              top-1/2 -translate-y-1/2
-              h-9 w-9 sm:h-10 sm:w-10
+              absolute right-[6%] top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center
               rounded-full border border-[#E4D6C4]
               bg-[#FBF6EE]/95 shadow-sm backdrop-blur-sm
               active:scale-95
+              sm:right-[10%] sm:h-10 sm:w-10
             "
           >
-            <span className="text-lg sm:text-xl text-[#7A6B59]">›</span>
+            <span className="text-lg text-[#7A6B59] sm:text-xl">›</span>
           </button>
 
           {/* Embla 뷰포트 */}
@@ -184,14 +188,13 @@ export default function ValueColumns() {
                 return (
                   <div
                     key={card.id}
-                    className="min-w-0 flex-[0_0_85%] sm:flex-[0_0_70%] lg:flex-[0_0_55%] px-3"
+                    className="min-w-0 flex-[0_0_85%] px-3 sm:flex-[0_0_70%] lg:flex-[0_0_55%]"
                   >
                     <article
                       className={[
-                        "bg-[#F3E5D5] rounded-[32px] shadow-md overflow-hidden",
+                        "flex flex-col overflow-hidden rounded-[32px] bg-[#F3E5D5] shadow-md",
                         "transition-all duration-500 ease-out",
                         "border border-[#E4D6C4]/70",
-                        "flex flex-col",
                         scaleClass,
                         opacityClass,
                         blurClass,
@@ -210,12 +213,12 @@ export default function ValueColumns() {
                       </div>
 
                       {/* 텍스트 영역 */}
-                      <div className="flex flex-col px-6 pb-7 pt-4 sm:px-7 sm:pb-8 sm:pt-5 min-h-[190px]">
+                      <div className="flex min-h-[190px] flex-col px-6 pb-7 pt-4 sm:px-7 sm:pb-8 sm:pt-5">
                         <div className="inline-flex rounded-full bg-[#F8EFE4] px-3 py-1 text-[11px] font-medium text-[#8B7B68]">
                           {card.tag}
                         </div>
 
-                        <h3 className="mt-3 text-[17px] font-semibold text-[#3B3127] leading-snug whitespace-pre-line">
+                        <h3 className="mt-3 whitespace-pre-line text-[17px] font-semibold leading-snug text-[#3B3127]">
                           {card.title}
                         </h3>
 
@@ -240,9 +243,7 @@ export default function ValueColumns() {
                 aria-label={`${index + 1}번 카드로 이동`}
                 className={[
                   "h-1.5 rounded-full transition-all duration-300",
-                  selectedIndex === index
-                    ? "w-5 bg-[#D39A6A]"
-                    : "w-1.5 bg-[#E4D6C4]",
+                  selectedIndex === index ? "w-5 bg-[#D39A6A]" : "w-1.5 bg-[#E4D6C4]",
                 ].join(" ")}
               />
             ))}

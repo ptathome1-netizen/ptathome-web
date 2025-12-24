@@ -8,8 +8,21 @@ type FAQItem = {
   a: string;
 };
 
+function openExternal(url: string) {
+  // ✅ 새 창 열기(대부분 환경에서 가장 안정적)
+  const win = window.open(url, "_blank", "noopener,noreferrer");
+
+  // ✅ 인앱 브라우저 등에서 새 창이 막힐 경우 fallback
+  if (!win) {
+    window.location.href = url;
+  }
+}
+
 export default function FAQSection() {
   const [open, setOpen] = useState<number | null>(0);
+
+  // ✅ 하단 배너와 동일하게 /chat 사용
+  const KAKAO_CHAT_URL = "https://pf.kakao.com/_GVuxin/chat";
 
   const faqs: FAQItem[] = useMemo(
     () => [
@@ -83,6 +96,13 @@ export default function FAQSection() {
     [],
   );
 
+  const handleKakaoClick = (e: React.MouseEvent) => {
+    // ✅ 아코디언 토글/부모 클릭 간섭 방지
+    e.preventDefault();
+    e.stopPropagation();
+    openExternal(KAKAO_CHAT_URL);
+  };
+
   return (
     <section className="bg-[#FAF8F3] py-20 sm:py-28">
       <div className="mx-auto max-w-4xl px-6">
@@ -100,7 +120,7 @@ export default function FAQSection() {
         </div>
 
         {/* Accordion */}
-        <div className="mt-10 rounded-2xl border border-[#E7DED3] bg-white/70 shadow-[0_10px_26px_rgba(0,0,0,0.04)]">
+        <div className="mt-10 overflow-hidden rounded-2xl border border-[#E7DED3] bg-white/70 shadow-[0_10px_26px_rgba(0,0,0,0.04)]">
           {faqs.map((item, i) => {
             const isOpen = open === i;
 
@@ -152,6 +172,27 @@ export default function FAQSection() {
                     <p className="mt-4 whitespace-pre-line text-[14px] leading-7 text-[#4B4035] sm:text-[15px]">
                       {item.a}
                     </p>
+
+                    {/* ✅ FAQ 내부 CTA */}
+                    <div className="mt-5 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={handleKakaoClick}
+                        className={[
+                          "relative z-10 pointer-events-auto",
+                          "inline-flex items-center justify-center",
+                          "rounded-full bg-[#CDBA97] px-7 py-3",
+                          "text-sm font-semibold text-white shadow-sm",
+                          "transition hover:opacity-95 active:scale-[0.99]",
+                        ].join(" ")}
+                      >
+                        카카오톡 채널로 문의하기
+                      </button>
+                    </div>
+
+                    <p className="mt-3 text-center text-[12px] leading-relaxed text-[#9A8C7E]">
+                      버튼 클릭 시 카카오톡 채널(새 창)로 이동합니다.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -159,9 +200,9 @@ export default function FAQSection() {
           })}
         </div>
 
-        {/* Micro note (optional spacing harmony) */}
         <p className="mt-6 text-center text-[12px] leading-relaxed text-[#9A8C7E]">
-          추가 문의는 하단의 체험수업 신청 버튼을 통해 편하게 남겨주세요.
+          추가 문의는 하단의 체험수업 신청 버튼 또는 위의 카카오톡 채널 문의
+          버튼을 통해 편하게 남겨주세요.
         </p>
       </div>
     </section>

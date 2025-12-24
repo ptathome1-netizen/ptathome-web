@@ -7,8 +7,8 @@ import About from "@/components/About";
 import ValueColumns from "@/components/ValueColumns";
 import ReviewsSection from "@/components/ReviewsSection";
 import PricingSection from "@/components/PricingSection";
-import FAQSection from "@/components/FAQSection";
 import ContactCTA from "@/components/ContactCTA";
+import FAQSection from "@/components/FAQSection";
 import ProcessSection from "@/components/ProcessSection";
 
 
@@ -34,8 +34,6 @@ export default function Home() {
       {/* PRICING SECTION */}
       <PricingSection />
 
-      {/* FAQ SECTION */}
-      <FAQSection />
 
       {/* CONTACT CTA */}
       <ContactCTA />
@@ -45,14 +43,17 @@ export default function Home() {
 
       {/* GLOBAL CTA HANDLERS */}
       <CTAHandlers />
-
-      {/* CHATBOT MODAL */}
+ 
+{/* FAQSection */}
+      <FAQSection />
+      
+{/* CHATBOT MODAL */}
       <ChatbotModal />
 
       {/* FOOTER */}
       <footer className="bg-[#FAF8F3] py-12 text-center text-[#6A6052] text-sm border-t border-[#E5DED2]">
         <p>© 2025 PT앳홈 | All Rights Reserved.</p>
-        <p className="mt-1">서울특별시 송파구 | 사업자등록번호 000-00-00000</p>
+        <p className="mt-1">서울특별시 송파구 | 사업자등록번호 790-05-03177</p>
       </footer>
     </main>
   );

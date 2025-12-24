@@ -10,28 +10,34 @@ export default function ReviewsSection() {
 
   return (
     <section className="relative isolate bg-[linear-gradient(180deg,#FFFDF8_0%,#FAF5EC_100%)] py-16 sm:py-20">
-      {/* 헤더 */}
-      <div className="mx-auto max-w-6xl px-6 text-center">
-        <p className="text-[12px] font-medium tracking-[0.18em] text-[#B8A89A]">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 md:px-6 lg:px-8">
+        {/* 라벨 */}
+        <div className="inline-flex items-center gap-2 self-start rounded-full border border-[#E6D8CB] bg-white px-3 py-1 text-xs font-medium text-[#C69C72]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#C69C72]" />
           고객후기
-        </p>
-        <h2 className="mt-3 text-[22px] font-semibold leading-snug text-[#1F2933] sm:text-[26px]">
-          편안하게 시작하고,
-          <br />
-          믿고 맡길 수 있는 홈트레이닝
-        </h2>
-        <p className="mt-3 text-[13px] leading-relaxed text-[#6B7280]">
-          집에서 받는 1:1 방문 PT,
-          <br />
-          실제 고객들의 변화를 직접 확인해 보세요.
-        </p>
-      </div>
+        </div>
 
-      {/* 2줄 레일 */}
-      <div className="mx-auto mt-10 max-w-6xl px-4">
-        <MarqueeRail items={railA} durationSec={44} />
-        <div className="h-6" />
-        <MarqueeRail items={railB} durationSec={52} reverse />
+        {/* 제목 및 설명 */}
+        <div className="max-w-3xl space-y-3">
+          <h2 className="text-2xl font-bold leading-snug tracking-tight text-[#3B2F2F] sm:text-3xl md:text-[2.1rem]">
+            편안하게 시작하고,
+            <br />
+            믿고 맡길 수 있는 홈트레이닝
+          </h2>
+
+          <p className="text-sm leading-relaxed text-[#5E5147] sm:text-[0.95rem]">
+            집에서 받는 1:1 방문 PT,
+            <br />
+            실제 고객들의 변화를 직접 확인해 보세요.
+          </p>
+        </div>
+
+        {/* 2줄 레일 */}
+        <div>
+          <MarqueeRail items={railA} durationSec={44} />
+          <div className="h-6" />
+          <MarqueeRail items={railB} durationSec={52} reverse />
+        </div>
       </div>
 
       <style>{`
@@ -107,9 +113,7 @@ function ReviewCard({ data }: { data: Review }) {
             <Quote className="h-4 w-4" />
           </div>
           <div className="flex flex-col">
-            <p className="text-[12px] font-medium text-[#7A6B59]">
-              {data.name}
-            </p>
+            <p className="text-[12px] font-medium text-[#7A6B59]">{data.name}</p>
             {data.date && (
               <p className="mt-0.5 text-[11px] text-[#A69480]">{data.date}</p>
             )}
