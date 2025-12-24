@@ -34,7 +34,7 @@ export default function Hero() {
 
       {/* ===== Content Wrapper ===== */}
       <div className="mx-auto w-full max-w-[1100px] px-4 sm:px-6 lg:px-8 pt-12 sm:pt-18 lg:pt-24 pb-16 sm:pb-20 lg:pb-28 text-center">
-        {/* ===== Logo (조금 더 큼 + 살짝 오른쪽) ===== */}
+        {/* ===== Logo ===== */}
         <div className="flex justify-center mb-2 sm:mb-4">
           <Image
             src="/logo/ptathome_logo_transparent_hd.png"
@@ -49,15 +49,19 @@ export default function Hero() {
         {/* ===== Title ===== */}
         <h1 className="mt-1 sm:mt-3 mx-auto max-w-[20rem] sm:max-w-[30rem] lg:max-w-[42rem] text-[28px] xs:text-[32px] sm:text-[46px] lg:text-[60px] font-extrabold leading-[1.23] tracking-[-0.01em] text-[#1F1711]">
           <span className="block">운동의 새로운 기준,</span>
-          <span className="block">나만의 공간에서 완성되다</span>
+          <span className="block">
+            나만의 공간에서{" "}
+            <span className="whitespace-nowrap">완성된다</span>
+          </span>
         </h1>
 
         {/* ===== Sub Description ===== */}
         <p className="mx-auto mt-4 sm:mt-5 max-w-[22rem] sm:max-w-[700px] text-[15px] sm:text-[17px] leading-[1.45] text-[#5C5245]">
           <span className="block">코치가 직접 찾아가는 1:1 맞춤 PT,</span>
           <span className="block">
-            가장 편안한 <span className="whitespace-nowrap">공간에서</span> 진짜
-            변화를 시작하세요.
+            가장 편안한{" "}
+            <span className="whitespace-nowrap">공간에서</span> 진짜 변화를
+            시작하세요.
           </span>
         </p>
 
