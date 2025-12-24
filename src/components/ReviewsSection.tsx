@@ -4,6 +4,38 @@ import { useMemo } from "react";
 import { REVIEWS, Review } from "@/data/reviews";
 import { Quote, CheckCircle } from "lucide-react";
 
+/* =========================
+   COPY (텍스트 시스템화)
+========================= */
+const COPY = {
+  label: "고객후기",
+  title: {
+    line1: "편안하게 시작하고,",
+    line2: "믿고 맡길 수 있는 홈트레이닝",
+  },
+  description: {
+    line1: "집에서 받는 1:1 방문 PT,",
+    line2: "실제 고객들의 변화를 직접 확인해 보세요.",
+  },
+  badges: {
+    verified: "예약 고객 후기",
+  },
+  aria: {
+    verifiedIcon: "예약 고객 후기 아이콘",
+  },
+  titleDerive: {
+    maxLen: 26,
+  },
+};
+
+/* =========================
+   MOTION (마키 설정)
+========================= */
+const MARQUEE = {
+  railASeconds: 44,
+  railBSeconds: 52,
+};
+
 export default function ReviewsSection() {
   const railA = useMemo(() => REVIEWS.filter((_, i) => i % 2 === 0), []);
   const railB = useMemo(() => REVIEWS.filter((_, i) => i % 2 === 1), []);
@@ -14,29 +46,31 @@ export default function ReviewsSection() {
         {/* 라벨 */}
         <div className="inline-flex items-center gap-2 self-start rounded-full border border-[#E6D8CB] bg-white px-3 py-1 text-xs font-medium text-[#C69C72]">
           <span className="h-1.5 w-1.5 rounded-full bg-[#C69C72]" />
-          고객후기
+          {COPY.label}
         </div>
 
         {/* 제목 및 설명 */}
         <div className="max-w-3xl space-y-3">
           <h2 className="text-2xl font-bold leading-snug tracking-tight text-[#3B2F2F] sm:text-3xl md:text-[2.1rem]">
-            편안하게 시작하고,
-            <br />
-            믿고 맡길 수 있는 홈트레이닝
+            <span className="block">{COPY.title.line1}</span>
+            <span className="block">{COPY.title.line2}</span>
           </h2>
 
           <p className="text-sm leading-relaxed text-[#5E5147] sm:text-[0.95rem]">
-            집에서 받는 1:1 방문 PT,
-            <br />
-            실제 고객들의 변화를 직접 확인해 보세요.
+            <span className="block">{COPY.description.line1}</span>
+            <span className="block">{COPY.description.line2}</span>
           </p>
         </div>
 
         {/* 2줄 레일 */}
         <div>
-          <MarqueeRail items={railA} durationSec={44} />
+          <MarqueeRail items={railA} durationSec={MARQUEE.railASeconds} />
           <div className="h-6" />
-          <MarqueeRail items={railB} durationSec={52} reverse />
+          <MarqueeRail
+            items={railB}
+            durationSec={MARQUEE.railBSeconds}
+            reverse
+          />
         </div>
       </div>
 
@@ -92,7 +126,7 @@ function MarqueeRail({
 }
 
 function ReviewCard({ data }: { data: Review }) {
-  const title = deriveTitleFromBody(data.body);
+  const title = deriveTitleFromBody(data.body, COPY.titleDerive.maxLen);
 
   return (
     <article
@@ -112,8 +146,11 @@ function ReviewCard({ data }: { data: Review }) {
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F4E7D7] text-[#C08A4D]">
             <Quote className="h-4 w-4" />
           </div>
+
           <div className="flex flex-col">
-            <p className="text-[12px] font-medium text-[#7A6B59]">{data.name}</p>
+            <p className="text-[12px] font-medium text-[#7A6B59]">
+              {data.name}
+            </p>
             {data.date && (
               <p className="mt-0.5 text-[11px] text-[#A69480]">{data.date}</p>
             )}
@@ -142,8 +179,11 @@ function ReviewCard({ data }: { data: Review }) {
 
         {data.verified && (
           <span className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF3] px-3 py-1 text-[11px] font-medium text-[#166534]">
-            <CheckCircle className="h-[14px] w-[14px]" />
-            예약 고객 후기
+            <CheckCircle
+              className="h-[14px] w-[14px]"
+              aria-label={COPY.aria.verifiedIcon}
+            />
+            {COPY.badges.verified}
           </span>
         )}
       </div>

@@ -2,6 +2,8 @@
 "use client";
 
 import React from "react";
+import SectionHeader from "@/components/ui/SectionHeader";
+import { Text } from "@/components/ui/Text";
 
 const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_GVuxin";
 const KAKAO_CHAT_URL = "https://pf.kakao.com/_GVuxin/chat";
@@ -23,26 +25,36 @@ export default function ContactCTA() {
   };
 
   return (
-    <section className="bg-[#FAF8F3] py-16 sm:py-20 text-center border-t border-[#E5DED2]">
-      <h3 className="text-[22px] sm:text-[26px] font-semibold text-[#1E1B16]">
-        궁금한 점이 있으신가요?
-      </h3>
-      <p className="mt-2 text-[15px] text-[#6A6052]">
-        1분만에 빠르게 문의 남기기
-      </p>
+    <section className="border-t border-[#E5DED2] bg-[#FAF8F3] py-16 text-center sm:py-20">
+      <div className="mx-auto max-w-6xl px-4">
+        <SectionHeader
+          align="center"
+          label={undefined}
+          title="궁금한 점이 있으신가요?"
+          description="1분만에 빠르게 문의 남기기"
+          className="mx-auto"
+        />
 
-      {/* ✅ a 태그 대신 button + window.open으로 동작 통일 (하단 고정바와 동일) */}
-      <button
-        type="button"
-        onClick={handleOpenKakao}
-        className="inline-flex items-center justify-center mt-6 rounded-full bg-[#CDBA97] hover:bg-[#BDA781] text-white px-8 py-3 text-[15px] font-medium shadow-md transition-all duration-300"
-      >
-        문의하기
-      </button>
+        {/* ✅ a 태그 대신 button + window.open으로 동작 통일 (하단 고정바와 동일) */}
+        <button
+          type="button"
+          onClick={handleOpenKakao}
+          className="mt-6 inline-flex items-center justify-center rounded-full bg-[#CDBA97] px-8 py-3 text-[15px] font-medium text-white shadow-md transition-all duration-300 hover:bg-[#BDA781]"
+        >
+          <Text as="span" variant="bodySm" tone="subtle" className="text-[15px] font-medium text-white">
+            문의하기
+          </Text>
+        </button>
 
-      <p className="mt-3 text-center text-[12px] leading-relaxed text-[#9A8C7E]">
-        버튼 클릭 시 카카오톡 채널(새 창)로 이동합니다.
-      </p>
+        <Text
+          as="p"
+          variant="caption"
+          tone="slateMuted"
+          className="mt-3 text-center text-[12px] leading-relaxed text-[#9A8C7E]"
+        >
+          버튼 클릭 시 카카오톡 채널(새 창)로 이동합니다.
+        </Text>
+      </div>
     </section>
   );
 }

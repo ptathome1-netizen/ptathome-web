@@ -1,5 +1,11 @@
 // src/components/sections/AboutSection.tsx
+"use client";
+
 import Image from "next/image";
+import SectionHeader from "@/components/ui/SectionHeader";
+import { Card } from "@/components/ui/Card";
+import { Heading } from "@/components/ui/Heading";
+import { Text } from "@/components/ui/Text";
 
 const FEATURES = [
   {
@@ -25,16 +31,20 @@ export default function AboutSection() {
     <section className="bg-[#F7F2E8]">
       <div className="mx-auto max-w-[1120px] px-6 py-16 lg:py-24">
         {/* 전체 카드 */}
-        <div className="rounded-[32px] bg-[#EBDDCE] px-5 pb-9 pt-8 shadow-[0_18px_60px_rgba(0,0,0,.08)] sm:px-7 sm:pt-9 sm:pb-10">
-          {/* 헤드라인 */}
-          <p className="text-[11px] tracking-[0.18em] text-[#B19B82]">
-            ABOUT 피티앳홈
-          </p>
-          <h2 className="mt-2 text-[24px] leading-snug text-[#2B241C] sm:text-[28px] sm:leading-snug font-extrabold">
-            나의 공간이 가장 완벽한
-            <br />
-            트레이닝 공간이 됩니다.
-          </h2>
+        <Card className="rounded-[32px] bg-[#EBDDCE] px-5 pb-9 pt-8 shadow-[0_18px_60px_rgba(0,0,0,.08)] sm:px-7 sm:pt-9 sm:pb-10 border-0">
+          {/* 헤더(텍스트 시스템화) */}
+          <SectionHeader
+            align="left"
+            label="ABOUT 피티앳홈"
+            title={
+              <>
+                <span className="block">나의 공간이 가장 완벽한</span>
+                <span className="block">트레이닝 공간이 됩니다.</span>
+              </>
+            }
+            description={undefined}
+            className="max-w-none"
+          />
 
           {/* 이미지 */}
           <div className="mt-6 rounded-[28px] bg-[#F4E7D8] p-1.5 sm:mt-7 sm:p-2">
@@ -64,23 +74,37 @@ export default function AboutSection() {
           </div>
 
           {/* 본문 텍스트 */}
-          <div className="mt-8 space-y-3 text-[14px] leading-[1.9] text-[#4F4337] sm:text-[15px]">
-            <p>
+          <div className="mt-8 space-y-3">
+            <Text
+              variant="bodySm"
+              tone="base"
+              className="text-[#4F4337] text-[14px] sm:text-[15px] leading-[1.9]"
+            >
               피티앳홈은 운동을 <strong>‘일상의 자연스러운 흐름’</strong>으로
               바꿉니다. 가장 편안한 나만의 공간에서, 언제든 진행할 수 있는
               루틴을 설계합니다.
-            </p>
-            <p>
+            </Text>
+
+            <Text
+              variant="bodySm"
+              tone="base"
+              className="text-[#4F4337] text-[14px] sm:text-[15px] leading-[1.9]"
+            >
               전문 코치가 <strong>직접 방문</strong>하여 체형·목표를 진단하고,
               생활 리듬에 맞춘 <strong>1:1 프로그램</strong>으로 꾸준함을
               만들어 드립니다.
-            </p>
-            <p className="font-semibold text-[#2B241C]">
+            </Text>
+
+            <Text
+              variant="bodySm"
+              tone="strong"
+              className="font-semibold text-[#2B241C] text-[14px] sm:text-[15px] leading-[1.9]"
+            >
               꾸준함은 환경에서 결정됩니다. 익숙한 나의 공간에서 시작된 작은
               루틴이, 결국 큰 변화를 만듭니다.
-            </p>
+            </Text>
           </div>
-        </div>
+        </Card>
       </div>
     </section>
   );
@@ -91,10 +115,7 @@ export default function AboutSection() {
 ------------------------ */
 function FeatureBadge({ icon, label }: { icon: string; label: string }) {
   return (
-    <div
-      className="flex items-center gap-3 rounded-full 
-                 bg-white px-4 py-3 shadow-[0_10px_30px_rgba(0,0,0,.08)]"
-    >
+    <div className="flex items-center gap-3 rounded-full bg-white px-4 py-3 shadow-[0_10px_30px_rgba(0,0,0,.08)]">
       <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#FFF5E5]">
         <Image
           src={icon}
@@ -104,9 +125,10 @@ function FeatureBadge({ icon, label }: { icon: string; label: string }) {
           className="h-6 w-6 object-contain"
         />
       </div>
-      <span className="text-[14px] font-medium text-[#3B3026]">
+
+      <Text as="span" variant="bodySm" tone="strong" className="text-[#3B3026] text-[14px] font-medium">
         {label}
-      </span>
+      </Text>
     </div>
   );
 }
