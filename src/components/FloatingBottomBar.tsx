@@ -1,15 +1,6 @@
-// src/components/FloatingBottomBar.tsx
 "use client";
 
 import React from "react";
-
-/* =========================
-   COPY (텍스트 시스템화)
-========================= */
-const COPY = {
-  primaryCta: "0원으로 시작하기",
-  secondaryCta: "문의하기",
-};
 
 const KAKAO_CHAT_URL = "https://pf.kakao.com/_GVuxin/chat";
 
@@ -26,26 +17,22 @@ export default function FloatingBottomBar() {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[900] flex justify-center px-3 pb-[env(safe-area-inset-bottom)] pointer-events-none md:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-[900] flex justify-center px-3 pb-[env(safe-area-inset-bottom)] pointer-events-none">
       <div className="pointer-events-auto flex w-full max-w-5xl items-center justify-center gap-2.5 rounded-t-2xl border border-[#E6E0D6] bg-white px-3 py-2 shadow-[0_-6px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
-        {/* Primary CTA */}
         <button
           type="button"
           onClick={handleOpenChatbot}
           className="inline-flex h-9 flex-1 items-center justify-center whitespace-nowrap rounded-full bg-[#F3E5CF] px-4 text-[13px] font-semibold text-[#31261B] shadow-sm transition hover:bg-[#EBD8BE] active:scale-[0.97]"
-          aria-label={COPY.primaryCta}
         >
-          {COPY.primaryCta}
+          0원으로 시작하기
         </button>
 
-        {/* Secondary CTA */}
         <button
           type="button"
           onClick={handleOpenKakao}
           className="inline-flex h-9 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-[#CDBDA7] bg-white px-4 text-[13px] font-semibold text-[#4A3A2A] shadow-sm transition hover:bg-[#F8F3EC] active:scale-[0.97]"
-          aria-label={COPY.secondaryCta}
         >
-          {COPY.secondaryCta}
+          문의하기
         </button>
       </div>
     </div>
