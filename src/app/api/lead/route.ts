@@ -24,14 +24,25 @@ type LeadPayload = {
   purposeDetail: string;
   equipments: string;
   address: string;
-  addressDetail: string;
+  addressDetail?: string; // ✅ addressDetail은 optional로 두는 게 안전
   calendarKeys: string[];
 };
 
+/* =========================
+   Env / Auth
+========================= */
+function mustEnv(key: string) {
+  const v = process.env[key];
+  if (!v) throw new Error(`Missing env: ${key}`);
+  return v;
+}
+
 function getJwt() {
-  const client_email = process.env.GOOGLE_SHEETS_CLIENT_EMAIL!;
-  let private_key = process.env.GOOGLE_SHEETS_PRIVATE_KEY!;
-  private_key = private_key.replace(/\\n/g, "\n"); // \n 복원
+  const client_email = mustEnv("GOOGLE_SHEETS_CLIENT_EMAIL");
+  const private_key_raw = mustEnv("GOOGLE_SHEETS_PRIVATE_KEY");
+
+  // Vercel env에 \n 형태로 저장했다면 복원
+  const private_key = private_key_raw.replace(/\\n/g, "\n");
 
   return new google.auth.JWT({
     email: client_email,
@@ -40,15 +51,22 @@ function getJwt() {
   });
 }
 
+/* =========================
+   Sheets helpers
+========================= */
 async function ensureSheetAndHeader(sheets: any, spreadsheetId: string) {
   const meta = await sheets.spreadsheets.get({ spreadsheetId });
-  const has = meta.data.sheets?.some((s: any) => s.properties?.title === SHEET_TITLE);
+  const has = meta.data.sheets?.some(
+    (s: any) => s.properties?.title === SHEET_TITLE
+  );
 
   if (!has) {
     console.log(`[Sheets] addSheet: ${SHEET_TITLE}`);
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId,
-      requestBody: { requests: [{ addSheet: { properties: { title: SHEET_TITLE } } }] },
+      requestBody: {
+        requests: [{ addSheet: { properties: { title: SHEET_TITLE } } }],
+      },
     });
   }
 
@@ -62,6 +80,9 @@ async function ensureSheetAndHeader(sheets: any, spreadsheetId: string) {
   });
 }
 
+/* =========================
+   GET (debug)
+========================= */
 export async function GET(req: Request) {
   // 디버그 엔드포인트: /api/lead?debug=1
   const url = new URL(req.url);
@@ -70,10 +91,12 @@ export async function GET(req: Request) {
   }
 
   try {
+    const spreadsheetId = mustEnv("GOOGLE_SHEETS_SPREADSHEET_ID");
+
     const auth = getJwt();
     await auth.authorize();
+
     const sheets = google.sheets({ version: "v4", auth });
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID!;
     const meta = await sheets.spreadsheets.get({ spreadsheetId });
 
     const info = {
@@ -85,24 +108,28 @@ export async function GET(req: Request) {
         index: s.properties?.index,
       })),
     };
+
     return NextResponse.json({ ok: true, info });
   } catch (e: any) {
     console.error("[GET /api/lead?debug] error:", e?.message || e);
-    return NextResponse.json({ ok: false, error: String(e?.message || e) }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: String(e?.message || e) },
+      { status: 500 }
+    );
   }
 }
 
+/* =========================
+   POST
+========================= */
 export async function POST(req: Request) {
-  const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID!;
-  if (!spreadsheetId) {
-    return NextResponse.json({ ok: false, error: "Missing GOOGLE_SHEETS_SPREADSHEET_ID" }, { status: 500 });
-  }
-
   try {
+    const spreadsheetId = mustEnv("GOOGLE_SHEETS_SPREADSHEET_ID");
     const body = (await req.json()) as LeadPayload;
 
     const auth = getJwt();
     await auth.authorize();
+
     const sheets = google.sheets({ version: "v4", auth });
 
     await ensureSheetAndHeader(sheets, spreadsheetId);
@@ -113,6 +140,11 @@ export async function POST(req: Request) {
       timeZone: "Asia/Seoul",
     }).format(new Date());
 
+    const fullAddress = [body.address, body.addressDetail]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+
     const row = [
       now,
       body.name ?? "",
@@ -122,16 +154,17 @@ export async function POST(req: Request) {
       (body.purposes || []).join(", "),
       body.purposeDetail ?? "",
       body.equipments ?? "",
-      [body.address, body.addressDetail].filter(Boolean).join(" "),
+      fullAddress,
       (body.calendarKeys || []).join(", "),
     ];
 
     console.log("[POST /api/lead] spreadsheetId:", spreadsheetId);
-    console.log("[POST /api/lead] sheet:", SHEET_TITLE, "row:", row);
+    console.log("[POST /api/lead] sheet:", SHEET_TITLE);
+    console.log("[POST /api/lead] row:", row);
 
     const result = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `'${SHEET_TITLE}'!A1`,           // 보수적: A1 기준 append
+      range: `'${SHEET_TITLE}'!A1`,
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values: [row] },
@@ -141,19 +174,20 @@ export async function POST(req: Request) {
     console.log("[Sheets] append updates:", updated);
 
     if (!updated || !updated.updatedRows || updated.updatedRows < 1) {
-      // 여기에 걸리면 실제로는 쓰이지 않은 상태 — 에러로 반환
       return NextResponse.json(
         { ok: false, error: "Append returned no updated rows", details: updated },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
     return NextResponse.json({ ok: true, updated }, { status: 200 });
   } catch (e: any) {
-    console.error("[/api/lead] error:", e?.errors || e?.message || e);
+    // googleapis 에러는 e.errors에 더 자세히 있을 때가 많음
+    console.error("[POST /api/lead] error:", e?.errors || e?.message || e);
+
     return NextResponse.json(
       { ok: false, error: String(e?.message || e) },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
