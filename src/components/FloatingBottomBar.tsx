@@ -17,24 +17,44 @@ export default function FloatingBottomBar() {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[900] flex justify-center px-3 pb-[env(safe-area-inset-bottom)] pointer-events-none">
-      <div className="pointer-events-auto flex w-full max-w-5xl items-center justify-center gap-2.5 rounded-t-2xl border border-[#E6E0D6] bg-white px-3 py-2 shadow-[0_-6px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
-        <button
-          type="button"
-          onClick={handleOpenChatbot}
-          className="inline-flex h-9 flex-1 items-center justify-center whitespace-nowrap rounded-full bg-[#F3E5CF] px-4 text-[13px] font-semibold text-[#31261B] shadow-sm transition hover:bg-[#EBD8BE] active:scale-[0.97]"
-        >
-          0원으로 시작하기
-        </button>
+    <>
+      {/* =========================
+          Desktop: 완전 제거 (아무것도 노출 X)
+          - md 이상에서는 렌더는 되지만 hidden 처리
+         ========================= */}
 
-        <button
-          type="button"
-          onClick={handleOpenKakao}
-          className="inline-flex h-9 flex-1 items-center justify-center whitespace-nowrap rounded-full border border-[#CDBDA7] bg-white px-4 text-[13px] font-semibold text-[#4A3A2A] shadow-sm transition hover:bg-[#F8F3EC] active:scale-[0.97]"
-        >
-          문의하기
-        </button>
+      {/* =========================
+          Mobile: 패턴 2번(우측 하단 미니 플로팅 CTA)
+         ========================= */}
+      <div
+        className="md:hidden fixed right-4 z-[900] pointer-events-none"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+      >
+        <div className="pointer-events-auto flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleOpenChatbot}
+            className="inline-flex h-11 w-[148px] items-center justify-center whitespace-nowrap rounded-full
+                       bg-[#F3E5CF] px-4 text-[13.5px] font-semibold text-[#31261B]
+                       shadow-[0_12px_26px_rgba(0,0,0,0.14)]
+                       transition active:scale-[0.98]"
+          >
+            0원으로 시작하기
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenKakao}
+            className="inline-flex h-11 w-[148px] items-center justify-center whitespace-nowrap rounded-full
+                       border border-[#CDBDA7] bg-white/92 backdrop-blur px-4
+                       text-[13.5px] font-semibold text-[#4A3A2A]
+                       shadow-[0_10px_22px_rgba(0,0,0,0.10)]
+                       transition active:scale-[0.98]"
+          >
+            문의하기
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

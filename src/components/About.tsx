@@ -4,26 +4,15 @@
 import Image from "next/image";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { Card } from "@/components/ui/Card";
-import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 
+const ABOUT_IMAGE_SRC = "/about/about-new.jpg"; // ✅ 여기를 새 이미지 경로로 바꾸세요
+
 const FEATURES = [
-  {
-    icon: "/about/icons/feature-science.png",
-    label: "운동과학 기반 · 1:1 설계",
-  },
-  {
-    icon: "/about/icons/feature-coach.png",
-    label: "검증된 코치 방문",
-  },
-  {
-    icon: "/about/icons/feature-car.png",
-    label: "이동 스트레스 ↓",
-  },
-  {
-    icon: "/about/icons/feature-private.png",
-    label: "프라이빗한 환경 유지",
-  },
+  { icon: "/about/icons/feature-science.png", label: "운동과학 기반 · 1:1 설계" },
+  { icon: "/about/icons/feature-coach.png", label: "검증된 코치 방문" },
+  { icon: "/about/icons/feature-car.png", label: "이동 스트레스 ↓" },
+  { icon: "/about/icons/feature-private.png", label: "프라이빗한 환경 유지" },
 ];
 
 export default function AboutSection() {
@@ -49,14 +38,18 @@ export default function AboutSection() {
           {/* 이미지 */}
           <div className="mt-6 rounded-[28px] bg-[#F4E7D8] p-1.5 sm:mt-7 sm:p-2">
             <div className="relative overflow-hidden rounded-[24px]">
-              <Image
-                src="/about/about-coaching.jpg"
-                alt="전문 코치가 집에서 자세를 교정하는 방문 PT 수업 장면"
-                width={960}
-                height={720}
-                className="h-full w-full object-cover object-center"
-                priority
-              />
+              {/* ✅ 비율 고정: 카드가 출렁이지 않도록 안정화 */}
+              <div className="relative w-full aspect-[4/3]">
+                <Image
+                  src={ABOUT_IMAGE_SRC}
+                  alt="전문 코치가 집에서 진행하는 방문 PT 수업 장면"
+                  fill
+                  sizes="(max-width: 640px) 92vw, (max-width: 1024px) 900px, 960px"
+                  className="object-cover object-[50%_35%]"
+                  priority
+                />
+              </div>
+
               {/* 아래쪽 부드러운 페이드 아웃 */}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#EBDDCE] via-transparent" />
             </div>
@@ -126,7 +119,12 @@ function FeatureBadge({ icon, label }: { icon: string; label: string }) {
         />
       </div>
 
-      <Text as="span" variant="bodySm" tone="strong" className="text-[#3B3026] text-[14px] font-medium">
+      <Text
+        as="span"
+        variant="bodySm"
+        tone="strong"
+        className="text-[#3B3026] text-[14px] font-medium"
+      >
         {label}
       </Text>
     </div>

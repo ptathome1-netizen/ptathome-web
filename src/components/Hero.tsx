@@ -22,7 +22,7 @@ const COPY = {
     },
     secondary: {
       label: "나만의 코치 만나보기",
-      note: "몇 가지 질문만으로, 나만의 코치를 추천해드려요.",
+      note: "몇 가지 질문만으로, 나에게 맞는 코치를 추천합니다.",
     },
   },
 };
@@ -82,19 +82,22 @@ export default function Hero() {
         </p>
 
         {/* ===== CTA Buttons ===== */}
-        <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+        {/* 버튼 수평 정렬: items-start + note min-height */}
+        <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-start justify-center gap-3 sm:gap-4">
           {/* Primary CTA */}
           <div className="w-full max-w-[360px] sm:w-[280px]">
             <button
               onClick={openChat}
-              className="group relative inline-flex w-full h-12 sm:h-[52px] items-center justify-center gap-2 rounded-full bg-[#2B241C] text-[15px] sm:text-[16px] font-semibold text-white border border-[#1F1A14] shadow-[0_8px_22px_rgba(0,0,0,.22)] active:scale-[0.98] transition-all duration-200 hover:-translate-y-[1px]"
+              className="relative inline-flex w-full h-12 sm:h-[52px] items-center justify-center rounded-full
+                         bg-[#2B241C] text-[15px] sm:text-[16px] font-semibold tracking-[-0.01em] text-white
+                         border border-[#1F1A14]
+                         shadow-[0_8px_22px_rgba(0,0,0,.22)]
+                         active:scale-[0.98] transition-all duration-200 sm:hover:-translate-y-[1px]"
             >
               <span>{COPY.cta.primary.label}</span>
-              <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
-                →
-              </span>
             </button>
-            <div className="mt-2 text-center text-[13px] sm:text-[13.5px] text-[#4F4639] leading-tight">
+
+            <div className="mt-2 min-h-[18px] text-center text-[13px] sm:text-[13.5px] text-[#4F4639] leading-tight">
               {COPY.cta.primary.note}
             </div>
           </div>
@@ -103,11 +106,16 @@ export default function Hero() {
           <div className="w-full max-w-[360px] sm:w-[280px]">
             <button
               onClick={openChat}
-              className="group relative inline-flex w-full h-12 sm:h-[52px] items-center justify-center gap-2 rounded-full bg-white/95 backdrop-blur-[2px] text-[15px] sm:text-[16px] font-semibold text-[#2B241C] border border-[#C2B7A6] shadow-[0_6px_18px_rgba(0,0,0,.14)] active:scale-[0.98] transition-all duration-200 hover:-translate-y-[1px]"
+              className="relative inline-flex w-full h-12 sm:h-[52px] items-center justify-center rounded-full
+                         bg-white/95 backdrop-blur-[2px] text-[15px] sm:text-[16px] font-semibold text-[#2B241C]
+                         border border-[#C2B7A6]
+                         shadow-[0_6px_18px_rgba(0,0,0,.14)]
+                         active:scale-[0.98] transition-all duration-200 sm:hover:-translate-y-[1px]"
             >
               <span>{COPY.cta.secondary.label}</span>
             </button>
-            <div className="mt-2 text-center text-[13px] sm:text-[13.5px] text-[#4F4639] leading-tight">
+
+            <div className="mt-2 min-h-[18px] text-center text-[13px] sm:text-[13.5px] text-[#4F4639] leading-tight whitespace-nowrap">
               {COPY.cta.secondary.note}
             </div>
           </div>
