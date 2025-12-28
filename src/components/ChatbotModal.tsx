@@ -12,8 +12,9 @@ declare global {
   }
 }
 
-/** ✅ 실제 고객 응대 번호로 교체 */
-const CS_PHONE = "0507-1469-0975";
+/** ✅ 운영용 연락처로 교체 */
+const CS_PHONE = "010-1234-5678";
+/** ✅ 카카오 채널 문의 URL (이미 사용 중인 값) */
 const KAKAO_CHAT_URL = "https://pf.kakao.com/_GVuxin/chat";
 
 /* ====== 데이터 타입 ====== */
@@ -44,17 +45,20 @@ const defaultForm: FormData = {
 };
 
 /* ====== 유틸 ====== */
-const toggleArray = (list: string[], v: string) =>
-  list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+function toggleArray(list: string[], v: string) {
+  return list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+}
 
-const digitsOnly = (v: string) => v.replace(/\D/g, "");
+function digitsOnly(v: string) {
+  return v.replace(/\D/g, "");
+}
 
-const formatPhoneInput = (v: string) => {
+function formatPhoneInput(v: string) {
   const d = digitsOnly(v).slice(0, 11);
   if (d.length <= 3) return d;
   if (d.length <= 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
   return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
-};
+}
 
 /* ====== 메인 컴포넌트 ====== */
 export default function ChatbotModal() {
@@ -62,72 +66,85 @@ export default function ChatbotModal() {
   const LOADING_STEP = 9;
 
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<number>(1);
   const [data, setData] = useState<FormData>(defaultForm);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  const [errorOpen, setErrorOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  /* 외부 이벤트로 열기 */
+  /** ✅ 에러 안내 모달 상태 */
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>(
+    "일시적인 오류로 신청 전송이 실패했습니다. 잠시 후 다시 시도해 주세요."
+  );
+
+  // 외부에서 열기: window.dispatchEvent(new Event("open-chatbot"))
   useEffect(() => {
     const handler = () => {
       setOpen(true);
-      setStep(1);
-      setData(defaultForm);
       setSubmitted(false);
       setSubmitting(false);
       setErrorOpen(false);
+      setData(defaultForm);
+      setStep(1);
       setTimeout(() => scrollRef.current?.scrollTo({ top: 0 }), 0);
     };
+
     window.addEventListener("open-chatbot", handler as EventListener);
     return () => window.removeEventListener("open-chatbot", handler as EventListener);
   }, []);
 
+  // 스텝 이동 시 스크롤 아래로
   useEffect(() => {
     if (!open) return;
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [step, open]);
 
-  const progress = useMemo(
-    () => Math.round((Math.min(step, QUESTION_STEPS) / QUESTION_STEPS) * 100),
-    [step]
-  );
+  // 진행률 (질문 단계까지만 표시)
+  const progress = useMemo(() => {
+    return Math.round((Math.min(step, QUESTION_STEPS) / QUESTION_STEPS) * 100);
+  }, [step]);
 
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
     setData((p) => ({ ...p, [k]: v }));
 
+  // 다음 버튼 활성 조건 (질문 단계만)
   const canNext = useMemo(() => {
     switch (step) {
       case 1:
-        return data.name.trim();
-      case 2:
-        return digitsOnly(data.phone).length >= 10;
+        return data.name.trim().length > 0;
+      case 2: {
+        const len = digitsOnly(data.phone).length;
+        return len >= 10;
+      }
       case 3:
-        return data.gender;
+        return data.gender !== "";
       case 4:
-        return data.ageRange;
+        return data.ageRange !== "";
       case 5:
         return data.purposes.length > 0;
+      case 6:
+        return true;
       case 7:
-        return data.address.trim();
+        return data.address.trim().length > 0;
       case 8:
         return data.calendarKeys.length > 0;
       default:
-        return true;
+        return false;
     }
   }, [step, data]);
 
-  const raiseError = (msg: string) => {
+  /** ✅ 공통 에러 처리: 로딩 종료 + 마지막 질문 단계로 복귀 + 안내 모달 오픈 */
+  const raiseSubmitError = (msg: string) => {
+    setErrorMessage(msg);
     setSubmitting(false);
     setStep(QUESTION_STEPS);
-    setErrorMessage(msg);
     setErrorOpen(true);
   };
 
+  /* ====== 제출 시작 (로딩 화면으로 이동) ====== */
   const beginSubmit = async () => {
     if (submitting) return;
 
@@ -135,27 +152,39 @@ export default function ChatbotModal() {
     setStep(LOADING_STEP);
 
     try {
+      const payload = {
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        gender: data.gender,
+        ageRange: data.ageRange,
+        purposes: data.purposes,
+        purposeDetail: data.purposeDetail.trim(),
+        equipments: data.equipments.trim(),
+        address: `${data.address} ${data.addressDetail || ""}`.trim(),
+        calendarKeys: data.calendarKeys,
+      };
+
       const res = await fetch("/api/lead", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          phone: data.phone.trim(),
-          address: `${data.address} ${data.addressDetail || ""}`.trim(),
-        }),
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        raiseError(
-          "일시적인 오류로 신청이 정상적으로 접수되지 않았습니다. 잠시 후 다시 시도해 주세요. 계속 문제가 발생하면 아래 연락처로 문의해 주세요."
+        const msg = await res.text().catch(() => "");
+        console.error("[lead api] error response:", msg);
+
+        raiseSubmitError(
+          "신청이 정상적으로 접수되지 않았습니다. 잠시 후 다시 시도해 주세요. 계속 문제가 발생하면 아래 연락처로 문의해 주세요."
         );
         return;
       }
 
       setSubmitted(true);
       setSubmitting(false);
-    } catch {
-      raiseError(
+    } catch (err) {
+      console.error("[lead api] network error:", err);
+      raiseSubmitError(
         "네트워크 문제로 신청 전송이 실패했습니다. 잠시 후 다시 시도해 주세요. 문제가 지속되면 아래 연락처로 문의해 주세요."
       );
     }
@@ -163,42 +192,340 @@ export default function ChatbotModal() {
 
   const next = () => {
     if (step < QUESTION_STEPS) setStep(step + 1);
-    else beginSubmit();
+    else if (step === QUESTION_STEPS) beginSubmit();
   };
 
-  const prev = () => !submitting && step > 1 && setStep(step - 1);
+  const prev = () => {
+    if (submitting) return;
+    if (step > 1 && step <= QUESTION_STEPS) setStep(step - 1);
+  };
+
+  /* ====== 카카오(다음) 주소검색 ====== */
+  const ensureDaumPostcode = () =>
+    new Promise<void>((res, rej) => {
+      if (window.daum?.Postcode) return res();
+      const s = document.createElement("script");
+      s.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+      s.async = true;
+      s.onload = () => res();
+      s.onerror = () => rej(new Error("다음 주소검색 로드 실패"));
+      document.body.appendChild(s);
+    });
+
+  const openDaumPostcode = async () => {
+    try {
+      await ensureDaumPostcode();
+      new window.daum!.Postcode({
+        oncomplete: (r: any) => {
+          const addr =
+            r.roadAddress?.trim() ||
+            r.address?.trim() ||
+            `${r.sido || ""} ${r.sigungu || ""} ${r.bname || ""}`.trim();
+          set("address", addr);
+          set("addressDetail", "");
+        },
+      }).open();
+    } catch (e) {
+      console.warn("[주소검색] 스크립트 로드 실패:", e);
+      setErrorMessage(
+        "주소검색을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요. 문제가 지속되면 아래 연락처로 문의해 주세요."
+      );
+      setErrorOpen(true);
+    }
+  };
 
   if (!open) return null;
 
-  const headerTitle =
-    submitted ? "트레이너 배정 안내" : step === LOADING_STEP ? "접수 중입니다" : "체험 수업 신청";
+  /* ====== 헤더 타이틀 ====== */
+  const headerTitle = submitted
+    ? "트레이너 배정 안내"
+    : step === LOADING_STEP || submitting
+    ? "접수 중입니다"
+    : "체험 수업 신청";
 
+  /* ====== UI ====== */
   return (
     <>
-      {/* ====== 메인 모달 ====== */}
-      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3">
-        <Card className="w-full max-w-[560px] rounded-2xl bg-white shadow-xl">
-          <div className="border-b px-5 py-4 flex justify-between">
-            <Heading level={3}>{headerTitle}</Heading>
-            <button onClick={() => !submitting && setOpen(false)}>닫기</button>
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3" role="dialog" aria-modal="true">
+        <Card className="w-full max-w-[560px] rounded-2xl border border-[#E6E0D6] bg-white shadow-xl">
+          {/* 헤더 */}
+          <div className="flex items-center justify-between gap-3 border-b border-[#EFEAE2] px-5 py-4">
+            {/* ✅ Heading variant 필수 */}
+            <Heading level={3} variant="card" tone="slate" className="text-[15px] font-semibold text-[#1F2937]">
+              {headerTitle}
+            </Heading>
+
+            <button
+              onClick={() => !submitting && setOpen(false)}
+              className="rounded-lg px-3 py-1 text-sm text-[#6B7280] hover:bg-black/[0.04]"
+              aria-label="닫기"
+            >
+              <Text as="span" variant="bodySm" tone="slateMuted" className="text-sm text-[#6B7280]">
+                닫기
+              </Text>
+            </button>
           </div>
 
+          {/* 진행바 (질문 단계에서만 표시) */}
           {!submitted && step <= QUESTION_STEPS && (
             <div className="px-5 pt-3">
-              <div className="h-1.5 bg-[#F3EDE3] rounded-full">
-                <div className="h-1.5 bg-[#CDBA97]" style={{ width: `${progress}%` }} />
+              <div className="h-1.5 w-full rounded-full bg-[#F3EDE3]">
+                <div className="h-1.5 rounded-full bg-[#CDBA97] transition-all" style={{ width: `${progress}%` }} />
+              </div>
+
+              <div className="mt-1.5 text-right">
+                <Text as="span" variant="caption" tone="slateMuted" className="text-xs text-[#6B7280]">
+                  {step} / {QUESTION_STEPS}
+                </Text>
               </div>
             </div>
           )}
 
-          <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto px-5 py-5">
-            {/* 기존 질문 UI 그대로 유지 */}
-            {/* (중략 — 질문 UI는 현재 사용 중인 코드 그대로 유지하면 됩니다) */}
+          {/* 바디 */}
+          <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto px-5 pb-5 pt-2">
+            {!submitted ? (
+              step === LOADING_STEP ? (
+                /* ====== 접수 중 화면 ====== */
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#E5D8C6] border-t-[#CDBA97] animate-spin" />
+
+                  <Heading level={3} variant="card" tone="slate" className="text-[15px] font-medium text-[#1F2937]">
+                    접수 중입니다
+                  </Heading>
+
+                  <Text variant="bodySm" tone="slateMuted" className="mt-2 text-xs sm:text-sm text-[#6B7280]">
+                    잠시만 기다려 주세요. 보내주신 정보를 안전하게 저장하고 있어요.
+                  </Text>
+                </div>
+              ) : (
+                /* ====== 질문 단계들 ====== */
+                <div className="space-y-4">
+                  {/* 1. 성함 */}
+                  {step === 1 && (
+                    <Bubble>
+                      <Q>성함을 알려주세요.</Q>
+                      <input
+                        className="mt-2 w-full rounded-lg border border-[#E5E7EB] px-3 py-2"
+                        placeholder="예) 김하나"
+                        value={data.name}
+                        onChange={(e) => set("name", e.target.value)}
+                        autoFocus
+                        disabled={submitting}
+                      />
+                    </Bubble>
+                  )}
+
+                  {/* 2. 전화번호 */}
+                  {step === 2 && (
+                    <Bubble>
+                      <Q>전화번호를 입력해주세요.</Q>
+                      <input
+                        className="mt-2 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 tracking-[0.05em]"
+                        placeholder="예) 010-1234-5678"
+                        inputMode="numeric"
+                        value={data.phone}
+                        onChange={(e) => set("phone", formatPhoneInput(e.target.value))}
+                        disabled={submitting}
+                      />
+                    </Bubble>
+                  )}
+
+                  {/* 3. 성별 */}
+                  {step === 3 && (
+                    <Bubble>
+                      <Q>성별을 선택해주세요.</Q>
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        {["여성", "남성"].map((g) => (
+                          <Choice
+                            key={g}
+                            active={data.gender === g}
+                            onClick={() => !submitting && set("gender", g as FormData["gender"])}
+                            label={g}
+                          />
+                        ))}
+                      </div>
+                    </Bubble>
+                  )}
+
+                  {/* 4. 연령대 */}
+                  {step === 4 && (
+                    <Bubble>
+                      <Q>연령대를 선택해주세요.</Q>
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {["10대", "20대", "30대", "40대", "50대", "60대 이상"].map((a) => (
+                          <Choice
+                            key={a}
+                            active={data.ageRange === a}
+                            onClick={() => !submitting && set("ageRange", a as FormData["ageRange"])}
+                            label={a}
+                          />
+                        ))}
+                      </div>
+                    </Bubble>
+                  )}
+
+                  {/* 5. 운동 목적(복수 선택) */}
+                  {step === 5 && (
+                    <Bubble>
+                      <Q>운동 목적을 선택해주세요. (복수 선택 가능)</Q>
+                      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {["체형교정", "생활통증완화", "컨디셔닝", "체력강화", "다이어트", "근력향상", "스트레칭"].map((p) => (
+                          <Choice
+                            key={p}
+                            active={data.purposes.includes(p)}
+                            onClick={() => !submitting && set("purposes", toggleArray(data.purposes, p))}
+                            label={p}
+                          />
+                        ))}
+                      </div>
+
+                      <Text as="label" variant="bodySm" tone="slateMuted" className="mt-3 block text-sm text-[#6B7280]">
+                        필요하시면 목적을 더 자세히 적어주세요. (선택)
+                      </Text>
+
+                      <textarea
+                        className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2"
+                        placeholder="예) 출산 후 체형 회복 / 목·허리 통증 완화 / 마라톤 대비 체력 강화 등"
+                        rows={3}
+                        value={data.purposeDetail}
+                        onChange={(e) => set("purposeDetail", e.target.value)}
+                        disabled={submitting}
+                      />
+                    </Bubble>
+                  )}
+
+                  {/* 6. 보유 도구(선택) */}
+                  {step === 6 && (
+                    <Bubble>
+                      <Q>보유하고 있는 운동 도구가 있다면 적어주세요. (선택)</Q>
+                      <input
+                        className="mt-2 w-full rounded-lg border border-[#E5E7EB] px-3 py-2"
+                        placeholder="예) 요가매트, 미니밴드, 2kg 덤벨 등"
+                        value={data.equipments}
+                        onChange={(e) => set("equipments", e.target.value)}
+                        disabled={submitting}
+                      />
+                    </Bubble>
+                  )}
+
+                  {/* 7. 주소 */}
+                  {step === 7 && (
+                    <Bubble>
+                      <Q>주소를 알려주세요. (상담 방문을 위해 필요합니다)</Q>
+                      <div className="mt-2 flex gap-2">
+                        <input
+                          className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2"
+                          placeholder="도로명 주소"
+                          value={data.address}
+                          onChange={(e) => set("address", e.target.value)}
+                          disabled={submitting}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={submitting ? undefined : openDaumPostcode}
+                          className="whitespace-nowrap rounded-lg border border-[#CDBA97] px-3 py-2 text-xs sm:text-sm text-[#1F2937] hover:bg-white/60"
+                        >
+                          <Text as="span" variant="bodySm" tone="slate" className="text-xs sm:text-sm text-[#1F2937]">
+                            주소검색
+                          </Text>
+                        </button>
+                      </div>
+
+                      <input
+                        className="mt-2 w-full rounded-lg border border-[#E5E7EB] px-3 py-2"
+                        placeholder="상세주소 (동/호수 등)"
+                        value={data.addressDetail}
+                        onChange={(e) => set("addressDetail", e.target.value)}
+                        disabled={submitting}
+                      />
+
+                      <Text as="p" variant="caption" tone="slateMuted" className="mt-1 text-xs text-[#6B7280]">
+                        ※ 카카오(다음) 주소검색을 이용해 도로명 주소를 자동으로 입력합니다.
+                      </Text>
+                    </Bubble>
+                  )}
+
+                  {/* 8. 요일·시간 캘린더 */}
+                  {step === 8 && (
+                    <Bubble>
+                      <Q>가능한 요일과 시간대를 선택해주세요. (복수 선택 가능)</Q>
+
+                      <div className="mt-2">
+                        <CalendarPicker
+                          value={data.calendarKeys}
+                          onToggle={(key: string) => !submitting && set("calendarKeys", toggleArray(data.calendarKeys, key))}
+                          title="가능한 요일 · 시간 선택"
+                          subtitle="여러 칸을 자유롭게 선택할 수 있어요 (1시간 단위)"
+                        />
+                      </div>
+
+                      <Text as="p" variant="caption" tone="slateMuted" className="mt-2 text-xs text-[#6B7280]">
+                        ※ 선택하신 시간대를 기준으로 담당 트레이너가 연락드립니다.
+                      </Text>
+                    </Bubble>
+                  )}
+                </div>
+              )
+            ) : (
+              /* ====== 완료 화면 ====== */
+              <div className="rounded-xl bg-[#FAF8F3] p-6 text-center text-[#1F2937]">
+                <Heading level={3} variant="card" tone="slate" className="text-base font-semibold">
+                  트레이너 배정 중입니다 💪
+                </Heading>
+                <Text variant="bodySm" tone="slateMuted" className="mt-2 text-sm text-[#6B7280]">
+                  보내주신 정보를 확인하고 곧 연락드리겠습니다. 감사합니다.
+                </Text>
+              </div>
+            )}
+          </div>
+
+          {/* 푸터 버튼들 */}
+          <div className="flex items-center justify-between gap-3 border-t border-[#EFEAE2] px-5 py-4">
+            {!submitted && step <= QUESTION_STEPS ? (
+              <>
+                <button
+                  type="button"
+                  onClick={prev}
+                  disabled={step === 1 || submitting}
+                  className="rounded-lg border border-[#CDBA97] px-4 py-2 text-sm text-[#1F2937] disabled:cursor-not-allowed disabled:opacity-40 hover:bg-white/60"
+                >
+                  <Text as="span" variant="bodySm" tone="slate" className="text-sm text-[#1F2937]">
+                    이전
+                  </Text>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={next}
+                  disabled={!canNext || submitting}
+                  className="rounded-lg bg-[#EADBC4] px-5 py-2 text-sm font-semibold text-[#1F2937] hover:bg-[#e4d1b3] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Text as="span" variant="bodySm" tone="slate" className="text-sm font-semibold text-[#1F2937]">
+                    {step < QUESTION_STEPS ? "다음" : submitting ? "접수 중..." : "제출하기"}
+                  </Text>
+                </button>
+              </>
+            ) : submitted ? (
+              <div className="flex w-full justify-end">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg bg-[#1F1B16] px-5 py-2 text-sm font-semibold text-white hover:opacity-95"
+                >
+                  <Text as="span" variant="bodySm" tone="subtle" className="text-sm font-semibold text-white">
+                    확인
+                  </Text>
+                </button>
+              </div>
+            ) : (
+              <div className="h-0 w-full" />
+            )}
           </div>
         </Card>
       </div>
 
-      {/* ====== 에러 안내 모달 (전화 + 카카오) ====== */}
+      {/* ✅ 에러 발생 시 안내 모달 (전화 + 카카오) */}
       <ErrorFallbackModal
         open={errorOpen}
         onClose={() => setErrorOpen(false)}
@@ -209,7 +536,48 @@ export default function ChatbotModal() {
   );
 }
 
-/* ====== 에러 안내 모달 ====== */
+/* ====== 프리미티브 ====== */
+function Bubble({ children }: { children: React.ReactNode }) {
+  return <div className="rounded-2xl border border-[#E6E0D6] bg-white/80 p-4 shadow-sm">{children}</div>;
+}
+
+function Q({ children }: { children: React.ReactNode }) {
+  return (
+    <Text as="div" variant="bodySm" tone="slate" className="text-[15px] font-medium text-[#1F2937]">
+      {children}
+    </Text>
+  );
+}
+
+function Choice({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "rounded-lg border px-3 py-2 text-sm transition",
+        active
+          ? "border-[#CDBA97] bg-[#FAF8F3] text-[#1F2937]"
+          : "border-[#E5E7EB] text-[#374151] hover:bg-black/[0.03]",
+      ].join(" ")}
+      aria-pressed={active}
+    >
+      <Text as="span" variant="bodySm" tone="slate" className="text-sm">
+        {label}
+      </Text>
+    </button>
+  );
+}
+
+/* ====== 에러 안내 모달 (전화 + 카카오) ====== */
 function ErrorFallbackModal({
   open,
   onClose,
@@ -221,32 +589,83 @@ function ErrorFallbackModal({
   phoneNumber: string;
   message: string;
 }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
+
+  const telHref = `tel:${phoneNumber.replace(/\D/g, "")}`;
+
+  const openKakao = () => {
+    if (typeof window === "undefined") return;
+    window.open(KAKAO_CHAT_URL, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative w-full max-w-[420px] rounded-2xl bg-white px-5 py-5 shadow-xl">
-        <h3 className="font-semibold">일시적인 오류가 발생했어요.</h3>
-        <p className="mt-2 text-sm">{message}</p>
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
 
-        <div className="mt-4 rounded-xl bg-[#F8F3EC] p-3">
-          <div className="text-xs">전화 문의</div>
-          <a href={`tel:${phoneNumber.replace(/\D/g, "")}`} className="text-lg font-semibold">
-            {phoneNumber}
-          </a>
+      <div className="relative w-full max-w-[420px] rounded-2xl border border-[#E6E0D6] bg-white px-5 py-5 shadow-[0_20px_70px_rgba(0,0,0,.20)]">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-[16px] font-semibold text-[#2B241C]">일시적인 오류가 발생했어요.</h3>
+            <p className="mt-2 text-[13.5px] leading-[1.6] text-[#4F4337]">{message}</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-9 w-9 rounded-full border border-[#E6E0D6] text-[#4F4639] hover:bg-[#F8F3EC]"
+            aria-label="닫기"
+          >
+            ✕
+          </button>
         </div>
 
-        <button
-          onClick={() => window.open(KAKAO_CHAT_URL, "_blank")}
-          className="mt-3 w-full rounded-full bg-[#F3E5CF] py-2 font-semibold"
-        >
-          카카오톡으로 문의하기
-        </button>
+        <div className="mt-4 grid gap-2">
+          {/* 전화 */}
+          <div className="rounded-xl bg-[#F8F3EC] px-4 py-3">
+            <div className="text-[12px] text-[#6A5A4C]">전화 문의</div>
+            <a href={telHref} className="mt-1 inline-block text-[18px] font-semibold text-[#2B241C]">
+              {phoneNumber}
+            </a>
+            <div className="mt-1 text-[12px] text-[#6A5A4C]">탭하면 바로 전화 연결됩니다.</div>
+          </div>
 
-        <button onClick={onClose} className="mt-3 w-full border rounded-full py-2">
-          확인
-        </button>
+          {/* 카카오 */}
+          <div className="rounded-xl border border-[#E6E0D6] bg-white px-4 py-3">
+            <div className="text-[12px] text-[#6A5A4C]">카카오 채널 문의</div>
+            <div className="mt-1 text-[13.5px] leading-[1.4] text-[#4F4337]">
+              전화가 어려우시면 카카오톡으로 편하게 문의해 주세요.
+            </div>
+
+            <button
+              type="button"
+              onClick={openKakao}
+              className="mt-2 inline-flex h-10 w-full items-center justify-center rounded-full
+                         bg-[#F3E5CF] text-[13.5px] font-semibold text-[#31261B]
+                         shadow-sm transition hover:bg-[#EBD8BE] active:scale-[0.98]"
+            >
+              카카오톡으로 문의하기
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-11 flex-1 rounded-full border border-[#CDBDA7] bg-white text-[14px] font-semibold text-[#2B241C] hover:bg-[#F8F3EC]"
+          >
+            확인
+          </button>
+        </div>
       </div>
     </div>
   );
