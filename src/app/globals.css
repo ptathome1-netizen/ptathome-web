@@ -169,6 +169,9 @@
   max-width: 1040px;
   margin-inline:auto;
   padding-inline: 16px;
+}
+
+/* ✅ (수정) keyframes는 블록 밖으로 */
 @keyframes luxshine {
   0% {
     transform: translateX(-160%) skewX(-12deg);
@@ -190,7 +193,6 @@
   }
 }
 
-}
 /* ===== CTA 미세 인터랙션(호버 전에도 은은히 보이게) ===== */
 @keyframes cta-float {
   0%   { transform: translateY(0); }
@@ -228,9 +230,9 @@
   .cta-shine::before { animation: none !important; }
 }
 .cta-shine::before {
-  /* 기존 내용 유지 + 이 줄 추가 */
   animation: cta-shine 6s ease-out infinite;  /* ✅ 자동 재생 활성화 */
 }
+
 /* =========================
    Smooth Shine (끊김 없는 루프)
    ========================= */
@@ -276,7 +278,7 @@
   background: linear-gradient(
     90deg,
     rgba(0,0,0,0) 0%,
-    rgba(155,135,110,.18) 50%,   /* Champagne Brown tint */
+    rgba(155,135,110,.18) 50%,
     rgba(0,0,0,0) 100%
   );
   filter: blur(1.2px);
@@ -294,6 +296,7 @@
     inset 0 -1px 0 rgba(255,255,255,.85),
     inset 0  1px 2px rgba(0,0,0,.06);
 }
+
 /* =========================
    Smooth Shine (끊김 없는 루프, 타이밍 분리형)
    ========================= */
@@ -364,8 +367,10 @@ button:active {
   transform: scale(0.99);
   transition: transform 0.08s ease;
 }
+
 /* 부드러운 앵커 스크롤 */
 html { scroll-behavior: smooth; }
+
 /* === Reviews: Quat-style twin marquee rails === */
 .review-rail{
   position:relative; overflow:hidden;
@@ -410,6 +415,7 @@ html { scroll-behavior: smooth; }
   .review-track{ animation:none !important; }
   .chip .chip-shimmer::before{ animation:none !important; }
 }
+
 @keyframes fade-in {
   from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
@@ -417,6 +423,7 @@ html { scroll-behavior: smooth; }
 .animate-fade-in {
   animation: fade-in 0.6s ease-out forwards;
 }
+
 /* === Chatbot finish overlay === */
 @keyframes fade-in {
   from { opacity: 0; transform: scale(0.98); }
@@ -426,39 +433,22 @@ html { scroll-behavior: smooth; }
   animation: fade-in 0.5s ease-out forwards;
 }
 @keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .animate-fade-in-up {
   animation: fade-in-up 0.4s ease-out forwards;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 /* 가로 슬라이더 스크롤바 숨기기 */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 :root{
   /* 하단 고정바 실제 높이에 맞춰 조정 (예: 72px ~ 88px) */
   --bottom-bar-h: 80px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --bottom-safe-pad: calc(var(--bottom-bar-h) + var(--safe-bottom));
 }
-
-

@@ -1,13 +1,3 @@
-export type Review = {
-  id: string;
-  name: string;        // "김**" 형태
-  body: string;        // 3~5줄, 실사용자 톤
-  tags: string[];      // 아래 10개 중 1~3개
-  date: string;        // "YYYY.MM"
-  verified?: boolean;  // 예약 고객 후기 여부
-};
-
-/** 사용 가능한 태그(10개, 고정) */
 export const ALLOWED_TAGS = [
   "#전문코치",
   "#프라이빗 환경",
@@ -21,8 +11,23 @@ export const ALLOWED_TAGS = [
   "#유연성향상",
 ] as const;
 
+export type AllowedTag = (typeof ALLOWED_TAGS)[number];
+
+export type Review = {
+  id: string;
+  name: string; // "김**" 형태
+  body: string; // 3~5줄, 실사용자 톤
+  tags: AllowedTag[];
+  date: string; // "YYYY.MM"
+  verified?: boolean;
+
+  // 실제 고객 리뷰 이미지용(선택)
+  imageSrc?: string;
+  imageAlt?: string;
+};
+
 export const REVIEWS: Review[] = [
-  {
+   {
     id: "r01",
     name: "김**",
     body:
@@ -33,6 +38,21 @@ export const REVIEWS: Review[] = [
     date: "2025.08",
     verified: true,
   },
+{
+    id: "r21",
+    name: "정산**",
+    body:
+      "수업 후 카톡으로 배운 동작과 주의할 점을 모두 정리해 보내주셔서,\n" +
+      "선생님을 만나지 않는 날에도 그 내용을 보며 운동을 꾸준히 이어갈 수 있었어요.\n" +
+      "6개월 정도 받아보니 지금까지 배운 동작들로 루틴을 짤 수 있게 되었고,\n" +
+      "이제는 20~30분 정도 근력운동을 혼자서도 할 수 있을 만큼 달라졌습니다.",
+    tags: ["#전문코치", "#지속성"],
+    date: "2026.02",
+    verified: true,
+    imageSrc: "/reviews/class-01.webp",
+    imageAlt: "피티앳홈 방문 PT 수업 장면",
+  },
+
   {
     id: "r02",
     name: "이**",
